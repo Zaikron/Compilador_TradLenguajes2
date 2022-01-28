@@ -14,71 +14,76 @@ public class Analysis {
     
     public void action(String palabra){
         if(palabra.equals("if")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra reservada");
         }else if(palabra.equals("else")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("while")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("for")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("switch")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("case")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("default")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("integer")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("float")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("string")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("char")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("boolean")){
-            System.out.println("Palabra Reservada");
+            System.out.println("Es una palabra peservada");
         }else if(palabra.equals("=")){
-            System.out.println("Asignacion");
+            System.out.println("Es un operador de asignacion");
         }else if(palabra.equals("==")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals("=!")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals(">")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals("<")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals(">=")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals("<=")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals("&&")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals("||")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de comparacion");
         }else if(palabra.equals(";")){
-            System.out.println("Separador de Sentencias");
+            System.out.println("Es un separador de sentencias");
         }else if(palabra.equals("{")){
-            System.out.println("Separador de Sentencias");
+            System.out.println("Es un separador de sentencias");
         }else if(palabra.equals("}")){
-            System.out.println("Separador de Sentencias");
+            System.out.println("Es un separador de sentencias");
         }else if(palabra.equals("(")){
-            System.out.println("Separador de Sentencias");
+            System.out.println("Es un separador de sentencias");
         }else if(palabra.equals(")")){
-            System.out.println("Separador de Sentencias");
+            System.out.println("Es un separador de sentencias");
         }else if(palabra.equals("+")){
-            System.out.println("Operador");
+            System.out.println("Es un operador matematico");
         }else if(palabra.equals("-")){
-            System.out.println("Operador");
+            System.out.println("Es un operador matematico");
         }else if(palabra.equals("*")){
-            System.out.println("Operador");
+            System.out.println("Es un operador matematico");
         }else if(palabra.equals("/")){
-            System.out.println("Operador");
+            System.out.println("Es un operador matematico");
         }else if(palabra.equals("++")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de incremento");
         }else if(palabra.equals("--")){
-            System.out.println("Operador");
+            System.out.println("Es un operador de drecremento");
         }else{
-            System.out.println("Identificador");
+            if(identifierCheck(palabra)){
+                System.out.println("Es un identificador");
+            }else{
+                System.out.println("Palabra no permitida, uso de simbolos incorrecto");
+            }
+            
         }
     }
     
@@ -90,6 +95,20 @@ public class Analysis {
             }
         }
         return null;
+    }
+    
+    public boolean identifierCheck(String identifier){
+        for(int i = 0; i < identifier.length(); i++){
+            if(identifier.charAt(i) == '+' || identifier.charAt(i) == '-' ||
+                    identifier.charAt(i) == '*' || identifier.charAt(i) == '/' ||
+                    identifier.charAt(i) == '(' || identifier.charAt(i) == ')' ||
+                    identifier.charAt(i) == '{' || identifier.charAt(i) == '}' ||
+                    identifier.charAt(i) == ';' || identifier.charAt(i) == '>' ||
+                    identifier.charAt(i) == '<' || identifier.charAt(i) == '!'){
+                return false;
+            }
+        }
+        return true;
     }
     
     

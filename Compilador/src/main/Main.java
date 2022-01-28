@@ -1,6 +1,7 @@
 
 package main;
 import java.util.ArrayList;
+import java.util.Scanner;
 import main.Utilities.Analysis;
 import main.Utilities.Loader;
 
@@ -10,8 +11,13 @@ public class Main {
         
         Loader loader = new Loader();
         Analysis analysis = new Analysis(loader.tokens);
+        Scanner scanner = new Scanner(System.in);
+        String token = "";
         
-        analysis.action("switch");
+        System.out.print("Introduce el token: ");
+        token = scanner.next();
+        
+        analysis.action(token);
         
     }
 
