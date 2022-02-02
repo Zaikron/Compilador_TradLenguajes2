@@ -11,80 +11,88 @@ public class Analysis {
         this.tokens = tokens;
     }
     
-    
     public void action(String palabra){
-        if(palabra.equals("if")){
-            System.out.println("Es una palabra reservada");
-        }else if(palabra.equals("else")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("while")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("for")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("switch")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("case")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("default")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("integer")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("float")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("string")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("char")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("boolean")){
-            System.out.println("Es una palabra peservada");
-        }else if(palabra.equals("=")){
-            System.out.println("Es un operador de asignacion");
-        }else if(palabra.equals("==")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals("=!")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals(">")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals("<")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals(">=")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals("<=")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals("&&")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals("||")){
-            System.out.println("Es un operador de comparacion");
-        }else if(palabra.equals(";")){
-            System.out.println("Es un separador de sentencias");
-        }else if(palabra.equals("{")){
-            System.out.println("Es un separador de sentencias");
-        }else if(palabra.equals("}")){
-            System.out.println("Es un separador de sentencias");
-        }else if(palabra.equals("(")){
-            System.out.println("Es un separador de sentencias");
-        }else if(palabra.equals(")")){
-            System.out.println("Es un separador de sentencias");
-        }else if(palabra.equals("+")){
-            System.out.println("Es un operador matematico");
-        }else if(palabra.equals("-")){
-            System.out.println("Es un operador matematico");
-        }else if(palabra.equals("*")){
-            System.out.println("Es un operador matematico");
-        }else if(palabra.equals("/")){
-            System.out.println("Es un operador matematico");
-        }else if(palabra.equals("++")){
-            System.out.println("Es un operador de incremento");
-        }else if(palabra.equals("--")){
-            System.out.println("Es un operador de drecremento");
-        }else{
-            if(identifierCheck(palabra)){
-                System.out.println("Es un identificador");
+        palabra=palabra.toLowerCase();
+
+        String[] splitedTokens=palabra.split(" ");
+
+
+        for(int i=0; i<splitedTokens.length; i++){
+            System.out.print(splitedTokens[i]);
+
+            if(splitedTokens[i].equals("if")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("else")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("while")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("for")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("switch")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("case")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("default")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("integer")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("float")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("string")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("char")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("boolean")){
+                System.out.println(" Es una palabra reservada");
+            }else if(splitedTokens[i].equals("=")){
+                System.out.println(" Es un operador de asignacion");
+            }else if(splitedTokens[i].equals("==")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals("=!")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals(">")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals("<")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals(">=")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals("<=")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals("&&")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals("||")){
+                System.out.println(" Es un operador de comparacion");
+            }else if(splitedTokens[i].equals(";")){
+                System.out.println(" Es un separador de sentencias");
+            }else if(splitedTokens[i].equals("{")){
+                System.out.println(" Es un separador de sentencias");
+            }else if(splitedTokens[i].equals("}")){
+                System.out.println(" Es un separador de sentencias");
+            }else if(splitedTokens[i].equals("(")){
+                System.out.println(" Es un separador de sentencias");
+            }else if(splitedTokens[i].equals(")")){
+                System.out.println(" Es un separador de sentencias");
+            }else if(splitedTokens[i].equals("+")){
+                System.out.println(" Es un operador matematico");
+            }else if(splitedTokens[i].equals("-")){
+                System.out.println(" Es un operador matematico");
+            }else if(splitedTokens[i].equals("*")){
+                System.out.println(" Es un operador matematico");
+            }else if(splitedTokens[i].equals("/")){
+                System.out.println(" Es un operador matematico");
+            }else if(splitedTokens[i].equals("++")){
+                System.out.println(" Es un operador de incremento");
+            }else if(splitedTokens[i].equals("--")){
+                System.out.println(" Es un operador de drecremento");
             }else{
-                System.out.println("Palabra no permitida, uso de simbolos incorrecto");
+                if(identifierCheck(splitedTokens[i])){
+                    System.out.println(" Es un identificador de "+splitedTokens[i].length()+" caracteres");
+                }else{
+                    System.out.println("Palabra no permitida, uso de simbolos incorrecto");
+                }
+
             }
-            
-        }
+        }  
     }
     
     

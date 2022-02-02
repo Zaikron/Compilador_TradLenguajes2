@@ -15,10 +15,9 @@ public class Main {
         String token = "";
         
         System.out.print("Introduce el token: ");
-        token = scanner.next();
-        
+        token = scanner.nextLine();
+
         analysis.action(token);
-        
     }
 
 }
