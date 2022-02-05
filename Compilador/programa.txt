@@ -1,3 +1,0 @@
-FOR ( INT i = 0 ; i < 10 ; i ++ ) { }
-FOR ( INT i = 0 ; i < 10 ; i ++ ) { }
-FOR ( INT i = 0 ; i < 10 ; i ++ ) { }
