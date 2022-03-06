@@ -1,109 +1,143 @@
 
 package Code;
-import static Code.Tokens.*;
+import compilerTools.Token;
+
 %%
 %class Lexer
-%type Tokens
-L=[a-zA-Z_]+
-D=[0-9]+
-espacio=[ ,\t,\r]+
+%type Token
+%line
+%column
 %{
-    public String lexeme;
+    private Token token(String lexeme, String lexicalComp, int line, int column){
+        return new Token(lexeme, lexicalComp, line+1, column+1);
+    }
 %}
-%%
+/* Variables básicas de comentarios y espacios */
+TerminadorDeLinea = \r|\n|\r\n
+EntradaDeCaracter = [^\r\n]
+EspacioEnBlanco = {TerminadorDeLinea} | [ \t\f]
+ComentarioTradicional = "/*" [^*] ~"*/" | "/*" "*"+ "/"
+FinDeLineaComentario = "//" {EntradaDeCaracter}* {TerminadorDeLinea}?
+ContenidoComentario = ( [^*] | \*+ [^/*] )*
+ComentarioDeDocumentacion = "/**" {ContenidoComentario} "*"+ "/"
 
-/* Espacios en blanco */
-{espacio} {/*Ignore*/}
-
-/* Comentarios */
-( "//"(.)* ) {/*Ignore*/}
-
-/* Salto de linea */
-( "\n" ) {return Linea;}
-
-/* Comillas */
-( "\"" ) {lexeme=yytext(); return Comillas;}
-
-/* Tipos de datos */
-( byte | int | char | long | float | double ) {lexeme=yytext(); return T_dato;}
-
-/* Tipo de dato String */
-( String ) {lexeme=yytext(); return Cadena;}
-
-/* Palabra reservada If */
-( if ) {lexeme=yytext(); return If;}
-
-/* Palabra reservada Else */
-( else ) {lexeme=yytext(); return Else;}
-
-/* Palabra reservada Do */
-( do ) {lexeme=yytext(); return Do;}
-
-/* Palabra reservada While */
-( while ) {lexeme=yytext(); return While;}
-
-/* Palabra reservada For */
-( for ) {lexeme=yytext(); return For;}
-
-/* Operador Igual */
-( "=" ) {lexeme=yytext(); return Igual;}
-
-/* Operador Suma */
-( "+" ) {lexeme=yytext(); return Suma;}
-
-/* Operador Resta */
-( "-" ) {lexeme=yytext(); return Resta;}
-
-/* Operador Multiplicacion */
-( "*" ) {lexeme=yytext(); return Multiplicacion;}
-
-/* Operador Division */
-( "/" ) {lexeme=yytext(); return Division;}
-
-/* Operadores logicos */
-( "&&" | "||" | "!" | "&" | "|" ) {lexeme=yytext(); return Op_logico;}
-
-/*Operadores Relacionales */
-( ">" | "<" | "==" | "!=" | ">=" | "<=" | "<<" | ">>" ) {lexeme = yytext(); return Op_relacional;}
-
-/* Operadores Atribucion */
-( "+=" | "-="  | "*=" | "/=" | "%=" ) {lexeme = yytext(); return Op_atribucion;}
-
-/* Operadores Incremento y decremento */
-( "++" | "--" ) {lexeme = yytext(); return Op_incremento;}
-
-/*Operadores Booleanos*/
-(true | false)      {lexeme = yytext(); return Op_booleano;}
-
-/* Parentesis de apertura */
-( "(" ) {lexeme=yytext(); return Parentesis_a;}
-
-/* Parentesis de cierre */
-( ")" ) {lexeme=yytext(); return Parentesis_c;}
-
-/* Llave de apertura */
-( "{" ) {lexeme=yytext(); return Llave_a;}
-
-/* Llave de cierre */
-( "}" ) {lexeme=yytext(); return Llave_c;}
-
-/* Corchete de apertura */
-( "[" ) {lexeme = yytext(); return Corchete_a;}
-
-/* Corchete de cierre */
-( "]" ) {lexeme = yytext(); return Corchete_c;}
-
-/* Marcador de inicio de algoritmo */
-( "main" ) {lexeme=yytext(); return Main;}
-
-/* Punto y coma */
-( ";" ) {lexeme=yytext(); return P_coma;}
+/* Comentario */
+Comentario = {ComentarioTradicional} | {FinDeLineaComentario} | {ComentarioDeDocumentacion}
 
 /* Identificador */
-{L}({L}|{D})* {lexeme=yytext(); return Identificador;}
+Letra = [A-Za-zÑñ_ÁÉÍÓÚáéíóúÜü]
+Digito = [0-9]
+Identificador = {Letra}({Letra}|{Digito})*
+
+/* Número */
+Numero = 0 | [1-9][0-9]*
+%%
+
+
+{Comentario}|{EspacioEnBlanco} { /*Ignorar*/ }
+
+/* Tipos de datos */
+( byte | char | long | float | double ) {return token(yytext(), "TIPO_DATO", yyline, yycolumn);}
+
+/* Tipo de dato int */
+( int ) {return token(yytext(), "INT", yyline, yycolumn);}
+
+/* Tipo de dato String */
+( String ) {return token(yytext(), "CADENA", yyline, yycolumn);}
+
+/* Comillas */
+\" {return token(yytext(), "COMILLAS", yyline, yycolumn);}
+
+/* Comillas Simples */
+\' {return token(yytext(), "C_SIMPLE", yyline, yycolumn);}
+
+/* Palabra reservada If */
+( if ) {return token(yytext(), "IF", yyline, yycolumn);}
+
+/* Palabra reservada Else */
+( else ) {return token(yytext(), "ELSE", yyline, yycolumn);}
+
+/* Palabra reservada Do */
+( do ) {return token(yytext(), "DO", yyline, yycolumn);}
+
+/* Palabra reservada While */
+( while ) {return token(yytext(), "WHILE", yyline, yycolumn);}
+
+/* Palabra reservada For */
+( for ) {return token(yytext(), "FOR", yyline, yycolumn);}
+
+/* Palabra reservada Return */
+( return ) {return token(yytext(), "RETURN", yyline, yycolumn);}
+
+/* Palabra reservada Void */
+( void ) {return token(yytext(), "VOID", yyline, yycolumn);}
+
+/* Operador Igual */
+( "=" ) {return token(yytext(), "ASIGNACION", yyline, yycolumn);}
+
+/* Operador Suma */
+( "+" ) {return token(yytext(), "SUMA", yyline, yycolumn);}
+
+/* Operador Resta */
+( "-" ) {return token(yytext(), "RESTA", yyline, yycolumn);}
+
+/* Operador Multiplicacion */
+( "*" ) {return token(yytext(), "MULTIPLICACION", yyline, yycolumn);}
+
+/* Operador Division */
+( "/" ) {return token(yytext(), "DIVISION", yyline, yycolumn);}
+
+/* Operadores logicos */
+( "&&" | "||" | "&" | "|" ) {return token(yytext(), "OP_LOGICO", yyline, yycolumn);}
+
+/* Operadores negacion */
+( "!" ) {return token(yytext(), "NEG", yyline, yycolumn);}
+
+/*Operadores Relacionales */
+( ">" | "<" | "==" | "!=" | ">=" | "<=" | "<<" | ">>" ) {return token(yytext(), "OP_RELACIONAL", yyline, yycolumn);}
+
+/* Operadores Atribucion */
+( "+=" | "-="  | "*=" | "/=" | "%=" ) {return token(yytext(), "OP_ATRIBUCION", yyline, yycolumn);}
+
+/* Operadores Incremento y decremento */
+( "++" | "--" ) {return token(yytext(), "OP_INCREMENTO", yyline, yycolumn);}
+
+/*Operadores Booleanos*/
+(true | false)      {return token(yytext(), "OP_BOOL", yyline, yycolumn);}
+
+/* Parentesis de apertura */
+( "(" ) {return token(yytext(), "PARENTESIS_A", yyline, yycolumn);}
+
+/* Parentesis de cierre */
+( ")" ) {return token(yytext(), "PARENTESIS_C", yyline, yycolumn);}
+
+/* Llave de apertura */
+( "{" ) {return token(yytext(), "LLAVE_A", yyline, yycolumn);}
+
+/* Llave de cierre */
+( "}" ) {return token(yytext(), "LLAVE_C", yyline, yycolumn);}
+
+/* Corchete de apertura */
+( "[" ) {return token(yytext(), "CORCHETE_A", yyline, yycolumn);}
+
+/* Corchete de cierre */
+( "]" ) {return token(yytext(), "CORCHETE_C", yyline, yycolumn);}
+
+/* Marcador de inicio de algoritmo */
+( "main" ) {return token(yytext(), "MAIN", yyline, yycolumn);}
+
+/* Punto y coma */
+( ";" ) {return token(yytext(), "PUNTO_COMA", yyline, yycolumn);}
+
+/* Simbolo para variable en sentencia */
+\$ {return token(yytext(), "SIMB_SENT", yyline, yycolumn);}
+
+/* Identificador */ 
+{Identificador} {return token(yytext(), "IDENTIFICADOR", yyline, yycolumn);}
 
 /* Numero */
-("(-"{D}+")")|{D}+ {lexeme=yytext(); return Numero;}
+{Numero} {return token(yytext(), "NUMERO", yyline, yycolumn);}
 
 /* Error de analisis */
- . {return ERROR;}
+. { return token(yytext(), "ERROR", yyline, yycolumn); }
+

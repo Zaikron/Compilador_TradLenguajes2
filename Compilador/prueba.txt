@@ -1,0 +1,52 @@
+
+main()
+{
+int x = 0;
+
+if($x > 0){
+int a = 1;
+}else{
+char c;
+}
+
+for(int i = 0; $i < 10; $i++){
+x++;
+x+=3;
+++y;
+}
+
+while($x < 10){
+x++;
+}
+
+if($x < 10){
+	if($x < 10){}else{}
+	if($x < 10){}
+}else{
+	if($x < 10){}
+}
+
+if($!x < 10 && $x > 0){
+	if($x < 10){
+	}
+	for(int i = 0; $i < 10; $i++){
+
+	}
+}
+
+while($x < 10){
+	for(int i = 0; $i < 10; $i++){
+
+	}
+}
+
+for(int i = 0; $i < 10; $i++){
+	while($x < 10){
+
+	}
+}
+
+
+
+return 0;
+}
