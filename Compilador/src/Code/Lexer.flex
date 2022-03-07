@@ -43,7 +43,7 @@ Numero = 0 | [1-9][0-9]*
 ( int ) {return token(yytext(), "INT", yyline, yycolumn);}
 
 /* Tipo de dato String */
-( String ) {return token(yytext(), "CADENA", yyline, yycolumn);}
+( string ) {return token(yytext(), "CADENA", yyline, yycolumn);}
 
 /* Comillas */
 \" {return token(yytext(), "COMILLAS", yyline, yycolumn);}
@@ -72,11 +72,14 @@ Numero = 0 | [1-9][0-9]*
 /* Palabra reservada Void */
 ( void ) {return token(yytext(), "VOID", yyline, yycolumn);}
 
+/* Coma */
+( "," ) {return token(yytext(), "COMA", yyline, yycolumn);}
+
 /* Operador Igual */
 ( "=" ) {return token(yytext(), "ASIGNACION", yyline, yycolumn);}
 
 /* Operador Suma */
-( "+" ) {return token(yytext(), "SUMA", yyline, yycolumn);}
+/*( "+" ) {return token(yytext(), "SUMA", yyline, yycolumn);}
 
 /* Operador Resta */
 ( "-" ) {return token(yytext(), "RESTA", yyline, yycolumn);}
@@ -85,7 +88,10 @@ Numero = 0 | [1-9][0-9]*
 ( "*" ) {return token(yytext(), "MULTIPLICACION", yyline, yycolumn);}
 
 /* Operador Division */
-( "/" ) {return token(yytext(), "DIVISION", yyline, yycolumn);}
+( "/" ) {return token(yytext(), "DIVISION", yyline, yycolumn);}*/
+
+/* Operadores Aritmeticos*/
+( "+" | "-" | "*" | "/" ) {return token(yytext(), "OP_ARIT", yyline, yycolumn);}
 
 /* Operadores logicos */
 ( "&&" | "||" | "&" | "|" ) {return token(yytext(), "OP_LOGICO", yyline, yycolumn);}
@@ -128,6 +134,9 @@ Numero = 0 | [1-9][0-9]*
 
 /* Punto y coma */
 ( ";" ) {return token(yytext(), "PUNTO_COMA", yyline, yycolumn);}
+
+/* Simbolo para funciones */
+\# {return token(yytext(), "GATO", yyline, yycolumn);}
 
 /* Simbolo para variable en sentencia */
 \$ {return token(yytext(), "SIMB_SENT", yyline, yycolumn);}

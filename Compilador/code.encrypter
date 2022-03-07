@@ -1,7 +1,41 @@
+#void incrementar($int x, $string nom, $float f, $char c){
+	while($x < 10){
+		x++;
+	}
+}
+
+#int sumar($int n){
+	while($x < 10){
+		x++;
+	}
+	n = n + 1;
+	return n;
+}
+
+#float dividir($float n){
+	n = n + 1;
+	return n
+}
+
+#string concatenar($string n){
+	n = n + "hola";
+	return n;
+}
+
+#char unir($char n){
+	n = n + 'd';
+	return n;
+}
 
 main()
 {
-int x = 0;
+int i = a + b + c;
+int i = a - 2;
+i = c - d + 3;
+x = x - 3;
+x = 4 - 3 + g;
+string st = "";
+st = "hola" + "mundo";
 
 if($x > 0){
 int a = 1;
@@ -9,7 +43,7 @@ int a = 1;
 char c;
 }
 
-for(int i = 0; $i < 10; $i++)
+for(int i = 0; $i < 10; $i++){
 x++;
 x+=3;
 ++y;
@@ -26,7 +60,7 @@ if($x < 10){
 	if($x < 10){}
 }
 
-if($!x < 10 && $x > 0){
+if($!x < 10 && $x > 0 || $x == 20){
 	if($x < 10){
 	}
 	for(int i = 0; $i < 10; $i++){
@@ -36,7 +70,10 @@ if($!x < 10 && $x > 0){
 
 while($x < 10){
 	for(int i = 0; $i < 10; $i++){
-
+		int i = a + b;
+		int i = a - 2;
+		i = c - d;
+		x = x - 3;
 	}
 }
 
@@ -47,6 +84,4 @@ for(int i = 0; $i < 10; $i++){
 }
 
 
-
-return 0;
 }
