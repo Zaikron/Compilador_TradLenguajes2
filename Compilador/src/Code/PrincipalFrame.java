@@ -6,6 +6,7 @@ import FileControl.GenerarRuta;
 import compilerTools.ErrorLSSL;
 import compilerTools.Functions;
 import compilerTools.Grammar;
+import compilerTools.Production;
 import compilerTools.Token;
 import java.awt.Color;
 import java.io.BufferedReader;
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -35,6 +37,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
     
     private ArrayList<Token> tokens;
     private ArrayList<ErrorLSSL> errors;
+    private ArrayList<Production> productions;
     
     public PrincipalFrame() {
         initComponents();
@@ -52,6 +55,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
         Functions.setLineNumberOnJTextComponent(textAnalysis);
         tokens = new ArrayList<>();
         errors = new ArrayList<>();
+        productions = new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -85,10 +89,13 @@ public class PrincipalFrame extends javax.swing.JFrame {
 
         jScrollPane3.setViewportView(textSintax);
 
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel1.setText("Texto de Analisis");
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel2.setText("Analisis Lexico");
 
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 1, 12)); // NOI18N
         jLabel3.setText("Analisis Sintactico");
 
         tableLex.setModel(new javax.swing.table.DefaultTableModel(
@@ -122,17 +129,20 @@ public class PrincipalFrame extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrollAnalysis)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
-                        .addGap(0, 333, Short.MAX_VALUE))
-                    .addComponent(btnAnalysis, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(12, 12, 12)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 794, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(scrollAnalysis, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnAnalysis, javax.swing.GroupLayout.PREFERRED_SIZE, 437, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane3)
+                            .addComponent(jScrollPane1))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -146,15 +156,14 @@ public class PrincipalFrame extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(scrollAnalysis)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnAnalysis)
-                        .addGap(6, 6, 6))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAnalysis, javax.swing.GroupLayout.PREFERRED_SIZE, 22, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 175, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 183, Short.MAX_VALUE)))
+                        .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 332, Short.MAX_VALUE)))
                 .addContainerGap())
         );
 
@@ -162,7 +171,9 @@ public class PrincipalFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAnalysisActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAnalysisActionPerformed
-
+        tokens.clear();
+        errors.clear();
+        productions.clear();
         try {
             lexAnalysis();
             addToLexTable();
@@ -171,6 +182,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
         }
         
         sintaxAnalysis();
+        semanticAnalysis();
         showOnConsole();
     }//GEN-LAST:event_btnAnalysisActionPerformed
 
@@ -248,7 +260,12 @@ public class PrincipalFrame extends javax.swing.JFrame {
     private void sintaxAnalysis(){
         Grammar grammar = new Grammar(tokens, errors);
         SintacticAnalysis sintax = new SintacticAnalysis();
-        sintax.analysis(grammar);
+        sintax.analysis(grammar, productions);
+    }
+    
+    private void semanticAnalysis(){
+        SemanticAnalysis s = new SemanticAnalysis();
+        s.analysis(productions, errors);
     }
     
 

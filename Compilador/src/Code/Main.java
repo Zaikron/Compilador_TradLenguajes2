@@ -10,7 +10,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
 
         Path path1 = Paths.get("src/Code/Lexer.flex");
-
         File fileFlex;
         fileFlex = new File(path1.toAbsolutePath().toString());
         JFlex.Main.generate(fileFlex);

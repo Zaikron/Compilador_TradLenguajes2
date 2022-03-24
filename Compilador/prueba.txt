@@ -1,4 +1,25 @@
+
 #void incrementar($int x, $string nom, $float f, $char c){
+	while($x < 10){
+		x++;
+	}
+}
+
+main(){
+
+char c = 'a';
+string s = "hola";
+int a = 0;
+a = 1;
+
+if($a > 1){
+a++;
+}
+
+}
+
+
+/*#void incrementar($int x, $string nom, $float f, $char c){
 	while($x < 10){
 		x++;
 	}
@@ -84,4 +105,4 @@ for(int i = 0; $i < 10; $i++){
 }
 
 
-}
+}*/

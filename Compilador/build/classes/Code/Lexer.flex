@@ -33,7 +33,6 @@ Identificador = {Letra}({Letra}|{Digito})*
 Numero = 0 | [1-9][0-9]*
 %%
 
-
 {Comentario}|{EspacioEnBlanco} { /*Ignorar*/ }
 
 /* Tipos de datos */

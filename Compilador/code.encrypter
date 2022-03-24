@@ -1,4 +1,26 @@
+
 #void incrementar($int x, $string nom, $float f, $char c){
+	while($x < 10){
+		x++;
+	}
+int u;
+}
+
+main(){
+
+char c = 'a';
+string s = "hola";
+int a = 0;
+a = 1;
+
+if($a > 1){
+a++;
+}
+
+}
+
+
+/*#void incrementar($int x, $string nom, $float f, $char c){
 	while($x < 10){
 		x++;
 	}
@@ -14,7 +36,7 @@
 
 #float dividir($float n){
 	n = n + 1;
-	return n
+	return n;
 }
 
 #string concatenar($string n){
@@ -84,4 +106,4 @@ for(int i = 0; $i < 10; $i++){
 }
 
 
-}
+}*/
