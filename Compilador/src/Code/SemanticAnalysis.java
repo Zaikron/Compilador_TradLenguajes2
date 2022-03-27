@@ -32,7 +32,7 @@ public class SemanticAnalysis {
         
         showStructs();
     }
-    //dejar las declaracion simple al final de cada grupo de reglas
+    //la comprobacion que tenga un i+numero mas bajo siempre va hasta arriba, y conforme mas grande el numero, mas abajo
     public void structAnalysis(Production p, ArrayList<ErrorLSSL> errors, String struct){
         ArrayList<Token> tokens = p.getTokens();
         for(int i = 0; i < tokens.size(); i++){
@@ -40,38 +40,50 @@ public class SemanticAnalysis {
             //System.out.println("Simbolo: " + t.getLexeme());
             //System.out.println("NombreToken: " + t.getLexicalComp());
 
-            //Variables byte
-            //declaracion con asignacion
-            if(t.getLexeme().equals("byte") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && Integer.parseInt(tokens.get(i+3).getLexicalComp())>0 && Integer.parseInt(tokens.get(i+3).getLexicalComp())<255){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                }else{//errores
-                    //fuera de rango
-                    if(Integer.parseInt(tokens.get(i+3).getLexicalComp())< 0 && Integer.parseInt(tokens.get(i+3).getLexicalComp())> 255)
+            //Variables int
+            //declaracion simple   
+            if(t.getLexeme().equals("int"))
+            {
+                //declaracion simple
+                if(tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+2).getLexicalComp().equals("PUNTO_COMA")){
+                    addIdentifier(struct, tokens.get(i+1).getLexeme());
+                }
+                //declaracion con asignacion
+                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexeme().equals(";"))
+                {
+                    if(tokens.get(i+3).getLexicalComp().equals("NUMERO") || tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR"))
                     {
-                        errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor fuera de rango(0-255)  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        addIdentifier(struct, tokens.get(i+1).getLexeme());
                     }
-                    //tipo de dato incorrecto
                     else
                     {
                         errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
                 }
-            //asignacion de una operacion aritmetica
-            }else if(t.getLexeme().equals("byte") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
-                //correcto
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato incorrecto en alguno de los operandos
-                }else{
-                    errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Operador no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                //declaracion y asignacion con operacion aritmetica
+                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT") && tokens.get(i+6).getLexeme().equals(";"))
+                {
+                    if(!tokens.get(i+3).getLexicalComp().equals("NUMERO"))
+                    {
+                        if(!tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR"))
+                        {
+                          errors.add(new ErrorLSSL(2, " --- Error Semantico({}): El primer operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
+                        }
+                    }
+                    else if(!tokens.get(i+5).getLexicalComp().equals("NUMERO"))
+                    {
+                        if(!tokens.get(i+5).getLexicalComp().equals("IDENTIFICADOR"))
+                        {
+                          errors.add(new ErrorLSSL(3, " --- Error Semantico({}): El segundo operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
+                        }
+                    }
+                    else
+                    {
+                        addIdentifier(struct, tokens.get(i+1).getLexeme());
+                    }
                 }
-            //declaracion simple    
-            }else if(t.getLexeme().equals("byte") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
-                addIdentifier(struct, tokens.get(i+1).getLexeme());
             }
-            
+            /*
             //Variables char
             //declaracion con asignacion
             if(t.getLexeme().equals("char") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
@@ -219,6 +231,7 @@ public class SemanticAnalysis {
             }else if(t.getLexeme().equals("string") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
                 addIdentifier(struct, tokens.get(i+1).getLexeme());
             }
+            */
         }
     }
     
