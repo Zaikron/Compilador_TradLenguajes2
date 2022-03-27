@@ -18,7 +18,7 @@ public class SemanticAnalysis {
         String struct = "GLOBAL";
         for(int i = 0; i < productions.size(); i++){
             Production p = productions.get(i);      
-            
+            //se separa el scope de las variables, global o de una funcion
             if(p.lexicalCompRank(0).equals("MAIN")){
                 struct = "MAIN";
                 structAnalysis(p, errors, struct);
@@ -40,15 +40,59 @@ public class SemanticAnalysis {
             //System.out.println("Simbolo: " + t.getLexeme());
             //System.out.println("NombreToken: " + t.getLexicalComp());
 
+            //Variables byte
+            //declaracion con asignacion
+            if(t.getLexeme().equals("byte") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
+                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && Integer.parseInt(tokens.get(i+3).getLexicalComp())>0 && Integer.parseInt(tokens.get(i+3).getLexicalComp())<255){
+                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
+                }else{
+                    if(Integer.parseInt(tokens.get(i+3).getLexicalComp())< 0 && Integer.parseInt(tokens.get(i+3).getLexicalComp())> 255)
+                    {
+                        errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor fuera de rango(0-255)  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                    else
+                    {
+                        errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+            //declaracion
+            }else if(t.getLexeme().equals("byte") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
+                addIdentifier(struct, tokens.get(i+1).getLexeme());
+            //asignacion de una operacion aritmetica
+            }else if(t.getLexeme().equals("byte") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
+                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
+                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
+                }else{
+                    if((Integer.parseInt(tokens.get(i+3).getLexeme()) + Integer.parseInt(tokens.get(i+5).getLexeme()))>255 || 
+                       (Integer.parseInt(tokens.get(i+3).getLexeme()) - Integer.parseInt(tokens.get(i+5).getLexeme()) < 0) || 
+                       (Integer.parseInt(tokens.get(i+3).getLexeme()) * Integer.parseInt(tokens.get(i+5).getLexeme()) > 255)){
+                        errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Valor fuera de rango(0-255)  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                    else
+                    {
+                        errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Operador no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+            }
+            
             //Variables int
+            //asignacion
             if(t.getLexeme().equals("int") && tokens.get(i+1).getLexicalComp().equals("ASIGNACION")){
                 if(tokens.get(i+3).getLexicalComp().equals("NUMERO")){
                     addIdentifier(struct, tokens.get(i+1).getLexeme()); //Se agrega el identificador. En i es int y en i+1 es el nombre de la variable
                 }else{
                     errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                 }
+            //declaracion
             }else if(t.getLexeme().equals("int") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
                 addIdentifier(struct, tokens.get(i+1).getLexeme());
+            //asignacion de una operacion aritmetica
+            }else if(t.getLexeme().equals("int") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
+                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
+                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
+                }else{
+                    errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Operador no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                }
             }
             
             //Variables string
@@ -94,6 +138,7 @@ public class SemanticAnalysis {
         return -1;
     }
     
+    //identifica que variable pertenece a que funcion, o si es global
     public void addIdentifier(String struct, String identifier){
         int index = getIndexStruct(struct);
         if(index != -1){
