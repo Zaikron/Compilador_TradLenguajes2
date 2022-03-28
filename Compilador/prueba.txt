@@ -7,9 +7,10 @@
 
 main(){
 
+int b;
 char c = 'a';
 string s = "hola";
-int a = 0;
+int a = b;
 a = 1;
 
 if($a > 1){

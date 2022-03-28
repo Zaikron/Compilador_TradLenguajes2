@@ -16,6 +16,8 @@ public class SemanticAnalysis {
     
     public void analysis(ArrayList<Production> productions, ArrayList<ErrorLSSL> errors){
         String struct = "GLOBAL";
+        addIdentifier("MAIN", createVar("c", "char")); //Variable para pruebas
+        
         for(int i = 0; i < productions.size(); i++){
             Production p = productions.get(i);      
             //se separa el scope de las variables, global o de una funcion
@@ -39,6 +41,7 @@ public class SemanticAnalysis {
             Token t = tokens.get(i);  //Token actual
             //System.out.println("Simbolo: " + t.getLexeme());
             //System.out.println("NombreToken: " + t.getLexicalComp());
+            
 
             //Variables int
             //declaracion simple   
@@ -46,17 +49,39 @@ public class SemanticAnalysis {
             {
                 //declaracion simple
                 if(tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+2).getLexicalComp().equals("PUNTO_COMA")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme());
+                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
                 }
                 //declaracion con asignacion
                 else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexeme().equals(";"))
                 {
-                    if(tokens.get(i+3).getLexicalComp().equals("NUMERO") || tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR"))
+                    if(tokens.get(i+3).getLexicalComp().equals("NUMERO"))
                     {
-                        addIdentifier(struct, tokens.get(i+1).getLexeme());
+                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
                     }
-                    else
-                    {
+                    
+                    /*** Comprobacion de un nombre de variable ***/
+                    else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
+                        //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                        if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                            //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                            if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
+                                //Comprobar si el tipo de dato de la variable asignada es correcto
+                                if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
+                                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
+                                }else{
+                                    errors.add(new ErrorLSSL(5, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                }
+                            }else{
+                                errors.add(new ErrorLSSL(6, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+                            
+                        }else{
+                            errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }
+                    /*** ***/
+                    
+                    else{
                         errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
                 }
@@ -79,9 +104,10 @@ public class SemanticAnalysis {
                     }
                     else
                     {
-                        addIdentifier(struct, tokens.get(i+1).getLexeme());
+                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
                     }
                 }
+                
             }
             /*
             //Variables char
@@ -241,6 +267,7 @@ public class SemanticAnalysis {
         }
     }
     
+    //Busqueda de la estructura (main o alguna funcion) para comprobar si existe, es ese caso devuelve el indice
     public int getIndexStruct(String struct){
         for(int i = 0; i < identifiers.size(); i++){
             if(identifiers.get(i).structName.equals(struct)){
@@ -250,8 +277,22 @@ public class SemanticAnalysis {
         return -1;
     }
     
+    //Obtener una variable
+    public Variable getVar(String struct, String name){
+        int index = getIndexStruct(struct);
+        System.out.println("i: " + index);
+        ArrayList<Variable> idfs = identifiers.get(index).words;
+        for(int i = 0; i < idfs.size(); i++){
+            System.out.println("N: " + idfs.get(i).name + " " + name);
+            if(idfs.get(i).name.equals(name)){
+                return idfs.get(i);
+            }
+        }
+        return null;
+    }
+    
     //identifica que variable pertenece a que funcion, o si es global
-    public void addIdentifier(String struct, String identifier){
+    public void addIdentifier(String struct, Variable identifier){
         int index = getIndexStruct(struct);
         if(index != -1){
             identifiers.get(index).addExist(identifier);
@@ -260,6 +301,52 @@ public class SemanticAnalysis {
             idfs.addNew(struct, identifier);
             identifiers.add(idfs);
         } 
+    }
+    
+    public Variable createVar(String nom, String type){
+        Variable v = new Variable(nom, type);
+        return v;
+    }
+    
+    //Comprobar si ya existe un nombre de variable
+    public boolean existIdentifier(String struct, String name){
+        int index = getIndexStruct(struct);
+        ArrayList<Variable> idfs = identifiers.get(index).words;
+        
+        for(int i = 0; i < idfs.size(); i++){
+            if(name.equals(idfs.get(i).name)){
+                System.out.println("true");
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    //Comprobar que una asignacion este correcta en cuanto al tipo de dato, Ejemplo: int a = b;
+    public boolean isCorrectType(String struct, String name, String type){
+        Variable v = getVar(struct, name);
+        
+        if(v != null){
+            System.out.println("V: " + v.type);
+            System.out.println("v: " + type);
+            if(v.type.equals(type)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    //Comprobar que en una asignacion los tipos de datos sean correctos, Ejemplo: a = b;
+    public boolean isCorrectAsign(String struct, String name){
+        Variable v1 = getVar(struct, name);
+        Variable v2 = getVar(struct, name);
+        
+        if(v1 != null && v2 != null){
+            if(v1.type.equals(v2.type)){
+                return true;
+            }
+        }
+        return false;
     }
     
 }

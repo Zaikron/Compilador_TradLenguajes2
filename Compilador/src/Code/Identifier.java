@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 public class Identifier {
     
-    String structName = "GLOBAL";
-    ArrayList<String> words;
+    public String structName = "GLOBAL";
+    public ArrayList<Variable> words;
     
     public Identifier(){
         words = new ArrayList<>();
@@ -15,17 +15,17 @@ public class Identifier {
     public void showIdentifiers(){
         System.out.println("* " + structName);
         for(int i = 0; i < words.size(); i++){
-            System.out.println("    - " + words.get(i));
+            System.out.println("    - " + words.get(i).type + " " + words.get(i).name);
         }
         System.out.println("-----------------------------");
     }
     
-    public void addNew(String struct, String idf){
+    public void addNew(String struct, Variable idf){
         structName = struct;
         words.add(idf);
     }
     
-    public void addExist(String idf){
+    public void addExist(Variable idf){
         words.add(idf);
     }
 }

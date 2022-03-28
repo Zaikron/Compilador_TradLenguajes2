@@ -74,7 +74,7 @@ public class SintacticAnalysis {
         g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "
                 + "(OP_ARIT (IDENTIFICADOR | NUMERO))* PUNTO_COMA", true, productions);
         g.group("DECLARACION", "INT IDENTIFICADOR PUNTO_COMA", true, productions);
-        g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION NUMERO PUNTO_COMA", true, productions);
+        g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) PUNTO_COMA", true, productions);
                 //Incorrectos
         g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "
                 + "(IDENTIFICADOR | NUMERO)* PUNTO_COMA", true,
