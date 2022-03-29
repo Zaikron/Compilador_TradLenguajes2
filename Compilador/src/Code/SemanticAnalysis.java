@@ -23,10 +23,12 @@ public class SemanticAnalysis {
             //se separa el scope de las variables, global o de una funcion
             if(p.lexicalCompRank(0).equals("MAIN")){
                 struct = "MAIN";
+                addIdentifier(struct, createVar("NULL", "NULL"));
                 structAnalysis(p, errors, struct);
             }else if(p.lexicalCompRank(0).equals("GATO") && p.lexicalCompRank(2).equals("IDENTIFICADOR")){
                 //struct = "FUNCTION";
                 struct = p.lexemeRank(2);
+                addIdentifier(struct, createVar("NULL", "NULL"));
                 structAnalysis(p, errors, struct);
             }
             
@@ -42,6 +44,19 @@ public class SemanticAnalysis {
             //System.out.println("Simbolo: " + t.getLexeme());
             //System.out.println("NombreToken: " + t.getLexicalComp());
             
+            
+            //Asignaciones, Ejemplo: a = b;
+            if(t.getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+1).getLexicalComp().equals("ASIGNACION")){
+                if(tokens.get(i+2).getLexicalComp().equals("IDENTIFICADOR")){
+                    if(existIdentifier(struct, t.getLexeme()) && existIdentifier(struct, tokens.get(i+2).getLexeme())){
+                        if(isCorrectAsign(struct, t.getLexeme(), tokens.get(i+2).getLexeme()) == false){
+                            errors.add(new ErrorLSSL(10, " --- Error Semantico({}): El tipo de dato de las variables no coincide  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }else{
+                        errors.add(new ErrorLSSL(11, " --- Error Semantico({}): La variable no a sido declarada  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+            }
 
             //Variables int
             //declaracion simple   
@@ -280,10 +295,8 @@ public class SemanticAnalysis {
     //Obtener una variable
     public Variable getVar(String struct, String name){
         int index = getIndexStruct(struct);
-        System.out.println("i: " + index);
         ArrayList<Variable> idfs = identifiers.get(index).words;
         for(int i = 0; i < idfs.size(); i++){
-            System.out.println("N: " + idfs.get(i).name + " " + name);
             if(idfs.get(i).name.equals(name)){
                 return idfs.get(i);
             }
@@ -315,7 +328,6 @@ public class SemanticAnalysis {
         
         for(int i = 0; i < idfs.size(); i++){
             if(name.equals(idfs.get(i).name)){
-                System.out.println("true");
                 return true;
             }
         }
@@ -327,8 +339,6 @@ public class SemanticAnalysis {
         Variable v = getVar(struct, name);
         
         if(v != null){
-            System.out.println("V: " + v.type);
-            System.out.println("v: " + type);
             if(v.type.equals(type)){
                 return true;
             }
@@ -337,9 +347,9 @@ public class SemanticAnalysis {
     }
     
     //Comprobar que en una asignacion los tipos de datos sean correctos, Ejemplo: a = b;
-    public boolean isCorrectAsign(String struct, String name){
-        Variable v1 = getVar(struct, name);
-        Variable v2 = getVar(struct, name);
+    public boolean isCorrectAsign(String struct, String name1, String name2){
+        Variable v1 = getVar(struct, name1);
+        Variable v2 = getVar(struct, name2);
         
         if(v1 != null && v2 != null){
             if(v1.type.equals(v2.type)){

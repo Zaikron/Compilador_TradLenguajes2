@@ -8,6 +8,7 @@
 main(){
 
 int b;
+int d;
 char c = 'a';
 string s = "hola";
 int a = b;

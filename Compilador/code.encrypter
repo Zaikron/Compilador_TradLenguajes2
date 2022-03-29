@@ -8,10 +8,10 @@
 main(){
 
 int b;
+int d;
 char c = 'a';
 string s = "hola";
 int a = b;
-int x = b;
 a = 1;
 
 if($a > 1){
