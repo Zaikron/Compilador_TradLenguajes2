@@ -29,18 +29,18 @@ public class SintacticAnalysis {
         g.group("DEC_FUNCION", "GATO IDENTIFICADOR", true,
                 2, "Error Sintactico({}): Falta palabra reservada (funcion)  [Linea: #, Caracter: %]"); 
         
-        g.group("DEC_FUNCION_RET", "GATO (INT | TIPO_DATO | CADENA) IDENTIFICADOR", true, productions);
+        g.group("DEC_FUNCION_RET", "GATO (INT | FLOAT | CHAR | CADENA) IDENTIFICADOR", true, productions);
 
 
         
         //Parametros
-        g.group("PARAMETROS", "SIMB_SENT (INT | TIPO_DATO | CADENA) IDENTIFICADOR", true);
+        g.group("PARAMETROS", "SIMB_SENT (INT | FLOAT | CHAR | CADENA) IDENTIFICADOR", true);
         
         
 
         /*Declaraciones: Tipos de datos */
                 //Correctos
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
+        /*g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
                 + "(OP_ARIT (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)))* PUNTO_COMA", true, productions);
         g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR PUNTO_COMA", true, productions);
         g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) PUNTO_COMA", true, productions);
@@ -67,7 +67,7 @@ public class SintacticAnalysis {
         
                     //Sin declaracion
         g.group("DECLARACION", "TIPO_DATO", true,
-                10, "Error Sintactico({}): No esta en una declaracion correcta (variable) [Linea: #, Caracter: %]");
+                10, "Error Sintactico({}): No esta en una declaracion correcta (variable) [Linea: #, Caracter: %]");*/
         
         /*Declaraciones: Enteros */
                 //Correctos
@@ -100,6 +100,74 @@ public class SintacticAnalysis {
                 //Sin declaracion
         g.group("DECLARACION", "INT", true,
                 12, "Error Sintactico({}): No esta en una declaracion correcta (variable) [Linea: #, Caracter: %]");
+        
+        /*Declaraciones: Flotantes */
+                //Correctos
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "
+                + "(OP_ARIT (IDENTIFICADOR | NUMERO))* PUNTO_COMA", true, productions);
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR PUNTO_COMA", true, productions);
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) PUNTO_COMA", true, productions);
+                //Incorrectos
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "
+                + "(IDENTIFICADOR | NUMERO)* PUNTO_COMA", true,
+                10, "Error Sintactico({}): Falto un operador (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "
+                + "OP_ARIT PUNTO_COMA", true,
+                11, "Error Sintactico({}): Falto un identificador (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "
+                + "(OP_ARIT (IDENTIFICADOR | NUMERO))*", true,
+                12, "Error Sintactico({}): Falto punto y coma (variable)  [Linea: #, Caracter: %]");        
+        
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR PARENTESIS_A", true,
+                7, "Error Sintactico({}): Error en la declaracion de la funcion (funcion, main)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "FLOAT PUNTO_COMA", true,
+                8, "Error Sintactico({}): Falto crear un nombre para la variable (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "FLOAT ASIGNACION NUMERO PUNTO_COMA", true,
+                9, "Error Sintactico({}): Falto crear un nombre para la variable (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR ASIGNACION NUMERO", true,
+                10, "Error Sintactico({}): Falto un simbolo ($ o ;)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "FLOAT IDENTIFICADOR", true,
+                11, "Error Sintactico({}): Falto un simbolo ($ o ;) (variable)  [Linea: #, Caracter: %]");
+        
+                //Sin declaracion
+        g.group("DECLARACION", "FLOAT", true,
+                12, "Error Sintactico({}): No esta en una declaracion correcta (variable) [Linea: #, Caracter: %]");
+        
+        
+        /*Declaraciones:  Caracteres */
+                //Correctos
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION (IDENTIFICADOR | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
+                + "(OP_ARIT (IDENTIFICADOR | (C_SIMPLE IDENTIFICADOR C_SIMPLE)))* PUNTO_COMA", true, productions);
+        g.group("DECLARACION", "CHAR IDENTIFICADOR PUNTO_COMA", true, productions);
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION C_SIMPLE C_SIMPLE PUNTO_COMA", true, productions);
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION C_SIMPLE IDENTIFICADOR C_SIMPLE PUNTO_COMA", true, productions);
+                //Incorrectos
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION (IDENTIFICADOR | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
+                + "(IDENTIFICADOR | (C_SIMPLE IDENTIFICADOR C_SIMPLE))* PUNTO_COMA", true,
+                13, "Error Sintactico({}): Falto un operador (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION (IDENTIFICADOR | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
+                + "OP_ARIT PUNTO_COMA", true,
+                13, "Error Sintactico({}): Falto un identificador (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION (IDENTIFICADOR | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
+                + "(OP_ARIT (IDENTIFICADOR | (C_SIMPLE IDENTIFICADOR C_SIMPLE)))*", true,
+                13, "Error Sintactico({}): Falto punto y coma (variable)  [Linea: #, Caracter: %]");
+                
+        g.group("DECLARACION", "CHAR PUNTO_COMA", true,
+                13, "Error Sintactico({}): Falto crear un nombre para la variable (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "CHAR ASIGNACION C_SIMPLE (IDENTIFICADOR | NUMERO) C_SIMPLE PUNTO_COMA", true,
+                14, "Error Sintactico({}): Falto crear un nombre para la variable (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "CHAR IDENTIFICADOR C_SIMPLE (IDENTIFICADOR | NUMERO) C_SIMPLE", true,
+                15, "Error Sintactico({}): Falto punto y coma (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) PUNTO_COMA", true,
+                16, "Error Sintactico({}): Faltaron comillas simples (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION C_SIMPLE (IDENTIFICADOR | NUMERO) PUNTO_COMA", true,
+                17, "Error Sintactico({}): Faltaro una comilla simple de cierre (variable)  [Linea: #, Caracter: %]");
+        g.group("DECLARACION", "CHAR IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) C_SIMPLE PUNTO_COMA", true,
+                18, "Error Sintactico({}): Falto una comilla simple de apertura (variable) [Linea: #, Caracter: %]");
+        
+                    //Sin declaracion
+        g.group("DECLARACION", "CHAR", true,
+                19, "Error Sintactico({}): No esta en una declaracion correcta (caracter) [Linea: #, Caracter: %]");
         
         
         /*Declaraciones:  Cadenas */
