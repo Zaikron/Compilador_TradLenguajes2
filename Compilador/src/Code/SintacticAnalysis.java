@@ -101,6 +101,14 @@ public class SintacticAnalysis {
         g.group("DECLARACION", "INT", true,
                 12, "Error Sintactico({}): No esta en una declaracion correcta (variable) [Linea: #, Caracter: %]");
         
+        //Incorrectas pero necesarias para las reglas semanticas
+        g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (C_SIMPLE|COMILLAS) (IDENTIFICADOR | NUMERO) (C_SIMPLE|COMILLAS) PUNTO_COMA"
+                , true, productions);
+        g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (C_SIMPLE|COMILLAS) (IDENTIFICADOR | NUMERO) (C_SIMPLE|COMILLAS)"
+                + " OP_ARIT (IDENTIFICADOR | NUMERO) PUNTO_COMA", true, productions);
+        g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO)"
+                + " OP_ARIT (C_SIMPLE|COMILLAS) (IDENTIFICADOR | NUMERO) (C_SIMPLE|COMILLAS) PUNTO_COMA", true, productions);
+        
         /*Declaraciones: Flotantes */
                 //Correctos
         g.group("DECLARACION", "FLOAT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "

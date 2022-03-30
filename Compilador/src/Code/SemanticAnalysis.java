@@ -94,33 +94,35 @@ public class SemanticAnalysis {
                             errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                         }
                     }
-                    /*** ***/
+                    /*** Error general de tipo ***/
                     
                     else{
                         errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
                 }
-                //declaracion y asignacion con operacion aritmetica
-                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT") && tokens.get(i+6).getLexeme().equals(";"))
+                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+6).getLexicalComp().equals("PUNTO_COMA"))
                 {
-                    if(!tokens.get(i+3).getLexicalComp().equals("NUMERO"))
+                    
+                        errors.add(new ErrorLSSL(3, " --- Error Semantico({}): no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
+                        
+                    
+                }
+                //declaracion y asignacion con operacion aritmetica
+                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT"))
+                {
+                    if(tokens.get(i+5).getLexicalComp().equals("COMILLAS") || tokens.get(i+5).getLexicalComp().equals("C_SIMPLE"))
                     {
-                        if(!tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR"))
-                        {
-                          errors.add(new ErrorLSSL(2, " --- Error Semantico({}): El primer operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
-                        }
-                    }
-                    else if(!tokens.get(i+5).getLexicalComp().equals("NUMERO"))
-                    {
-                        if(!tokens.get(i+5).getLexicalComp().equals("IDENTIFICADOR"))
-                        {
-                          errors.add(new ErrorLSSL(3, " --- Error Semantico({}): El segundo operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
-                        }
+                        errors.add(new ErrorLSSL(3, " --- Error Semantico({}): El segundo operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
+                        
                     }
                     else
                     {
                         addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
                     }
+                }
+                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+6).getLexicalComp().equals("OP_ARIT"))
+                {
+                    errors.add(new ErrorLSSL(2, " --- Error Semantico({}): El primer operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
                 }
                 
             }
