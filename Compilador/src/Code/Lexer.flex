@@ -35,11 +35,14 @@ Numero = 0 | [1-9][0-9]*
 
 {Comentario}|{EspacioEnBlanco} { /*Ignorar*/ }
 
-/* Tipos de datos */
-( byte | char | long | float | double ) {return token(yytext(), "TIPO_DATO", yyline, yycolumn);}
-
 /* Tipo de dato int */
 ( int ) {return token(yytext(), "INT", yyline, yycolumn);}
+
+/* Tipo de dato int */
+( float ) {return token(yytext(), "FLOAT", yyline, yycolumn);}
+
+/* Tipo de dato String */
+( char ) {return token(yytext(), "CHAR", yyline, yycolumn);}
 
 /* Tipo de dato String */
 ( string ) {return token(yytext(), "CADENA", yyline, yycolumn);}
