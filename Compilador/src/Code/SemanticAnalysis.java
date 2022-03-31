@@ -44,6 +44,14 @@ public class SemanticAnalysis {
             //System.out.println("Simbolo: " + t.getLexeme());
             //System.out.println("NombreToken: " + t.getLexicalComp());
             
+            //Para guardar las variables en los parametros
+            if(t.getLexicalComp().equals("SIMB_SENT")){
+                if(tokens.get(i+1).getLexicalComp().equals("INT") | tokens.get(i+1).getLexicalComp().equals("FLOAT") 
+                        | tokens.get(i+1).getLexicalComp().equals("CHAR") | tokens.get(i+1).getLexicalComp().equals("CADENA")){
+                    
+                    addIdentifier(struct, createVar(tokens.get(i+2).getLexeme(), tokens.get(i+1).getLexeme()));
+                }
+            }
             
             //Asignaciones, Ejemplo: a = b;
             if(t.getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+1).getLexicalComp().equals("ASIGNACION")){

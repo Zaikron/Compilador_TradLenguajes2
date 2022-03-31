@@ -37,6 +37,24 @@ public class SintacticAnalysis {
         g.group("PARAMETROS", "SIMB_SENT (INT | FLOAT | CHAR | CADENA) IDENTIFICADOR", true);
         
         
+        //LLamada de la funcion
+        g.group("LLAMADA_FUNCT", "IDENTIFICADOR PARENTESIS_A ((NUMERO | IDENTIFICADOR | (COMILLAS IDENTIFICADOR COMILLAS) | "
+                + "(C_SIMPLE IDENTIFICADOR C_SIMPLE) | (COMILLAS COMILLAS) | (C_SIMPLE C_SIMPLE))"
+                + " (COMA (NUMERO | IDENTIFICADOR | (COMILLAS IDENTIFICADOR COMILLAS) | "
+                + "(C_SIMPLE IDENTIFICADOR C_SIMPLE) | (COMILLAS COMILLAS) | (C_SIMPLE C_SIMPLE)))+)* PARENTESIS_C PUNTO_COMA");
+            //Errores
+        g.group("LLAMADA_FUNCT", "IDENTIFICADOR PARENTESIS_A ((NUMERO | IDENTIFICADOR | (COMILLAS IDENTIFICADOR COMILLAS) | "
+                + "(C_SIMPLE IDENTIFICADOR C_SIMPLE) | (COMILLAS COMILLAS) | (C_SIMPLE C_SIMPLE))"
+                + " (COMA (NUMERO | IDENTIFICADOR | (COMILLAS IDENTIFICADOR COMILLAS) | "
+                + "(C_SIMPLE IDENTIFICADOR C_SIMPLE) | (COMILLAS COMILLAS) | (C_SIMPLE C_SIMPLE)))+)* PARENTESIS_C", true,
+                3, "Error Sintactico({}): Falto punto y coma (llamada funcion) [Linea: #, Caracter: %]");
+        
+        g.group("LLAMADA_FUNCT", "IDENTIFICADOR PARENTESIS_A ((NUMERO | IDENTIFICADOR | (COMILLAS IDENTIFICADOR COMILLAS) | "
+                + "(C_SIMPLE IDENTIFICADOR C_SIMPLE) | (COMILLAS COMILLAS) | (C_SIMPLE C_SIMPLE))"
+                + " ((COMA)? (NUMERO | IDENTIFICADOR | (COMILLAS IDENTIFICADOR COMILLAS) | "
+                + "(C_SIMPLE IDENTIFICADOR C_SIMPLE) | (COMILLAS COMILLAS) | (C_SIMPLE C_SIMPLE)))+)* PARENTESIS_C PUNTO_COMA", true,
+                4, "Error Sintactico({}): Falto coma(s) (llamada funcion) [Linea: #, Caracter: %]");
+        
 
         /*Declaraciones: Tipos de datos */
                 //Correctos
@@ -637,7 +655,7 @@ public class SintacticAnalysis {
         /*g.loopForFunExecUntilChangeNotDetected(() -> {
         });*/
 
-        //g.show();
+        g.show();
         
     }
     
@@ -650,6 +668,6 @@ public class SintacticAnalysis {
         g.group("FOR_C", "FOR PARENTESIS_A SENT_FOR PARENTESIS_C LLAVE_A (SENTENCIA)* LLAVE_C", true);
         g.group("WHILE_C", "WHILE PARENTESIS_A BOLEANA PARENTESIS_C LLAVE_A (SENTENCIA)* LLAVE_C", true);
         
-        g.group("SENTENCIA", "(SENTENCIA | DECLARACION | SENT_IF | SENT_IFELSE | FOR_C | WHILE_C)*", true);
+        g.group("SENTENCIA", "(SENTENCIA | DECLARACION | SENT_IF | SENT_IFELSE | FOR_C | WHILE_C | LLAMADA_FUNCT)*", true);
     }
 }

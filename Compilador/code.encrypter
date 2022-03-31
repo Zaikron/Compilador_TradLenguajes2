@@ -14,6 +14,8 @@ string s = "hola";
 int a = b;
 a = 1;
 
+incrementar(1, "julio", 54 'g');
+
 if($a > 1){
 a++;
 }
