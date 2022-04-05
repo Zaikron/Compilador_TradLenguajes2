@@ -16,20 +16,25 @@ public class SemanticAnalysis {
     
     public void analysis(ArrayList<Production> productions, ArrayList<ErrorLSSL> errors){
         String struct = "GLOBAL";
-        addIdentifier("MAIN", createVar("c", "char")); //Variable para pruebas
+        //addIdentifier("MAIN", createVar("c", "char","NULL")); //Variable para pruebas
         
         for(int i = 0; i < productions.size(); i++){
-            Production p = productions.get(i);      
+            Production p = productions.get(i);  
             //se separa el scope de las variables, global o de una funcion
             if(p.lexicalCompRank(0).equals("MAIN")){
                 struct = "MAIN";
-                addIdentifier(struct, createVar("NULL", "NULL"));
+                addIdentifier(struct, createVar("NULL", "NULL","NULL"));
+                identifiers.get(getIndexStruct(struct)).type = "void";
                 structAnalysis(p, errors, struct);
             }else if(p.lexicalCompRank(0).equals("GATO") && p.lexicalCompRank(2).equals("IDENTIFICADOR")){
-                //struct = "FUNCTION";
                 struct = p.lexemeRank(2);
-                addIdentifier(struct, createVar("NULL", "NULL"));
-                structAnalysis(p, errors, struct);
+                if(existFunction(struct) == false){
+                    addIdentifier(struct, createVar("NULL", "NULL","NULL"));
+                    identifiers.get(getIndexStruct(struct)).type = p.lexemeRank(1);
+                    structAnalysis(p, errors, struct);
+                }else{
+                    errors.add(new ErrorLSSL(30, " --- Error Semantico({}): La funcion ya existe  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
+                }
             }
             
         }
@@ -44,21 +49,123 @@ public class SemanticAnalysis {
             //System.out.println("Simbolo: " + t.getLexeme());
             //System.out.println("NombreToken: " + t.getLexicalComp());
             
+            //Comprobacion de que se retorne el tipo correcto en una funcion
+            if(t.getLexicalComp().equals("RETURN")){
+                if(tokens.get(i+1).getLexicalComp().equals("NUMERO")){
+                    if(!identifiers.get(getIndexStruct(struct)).type.equals("int")){
+                        errors.add(new ErrorLSSL(40, " --- Error Semantico({}): La funcion "+struct+" no esta retornando un valor correcto  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }else if(tokens.get(i+1).getLexicalComp().equals("COMILLAS")){
+                    if(!identifiers.get(getIndexStruct(struct)).type.equals("string")){
+                        errors.add(new ErrorLSSL(41, " --- Error Semantico({}): La funcion "+struct+" no esta retornando un valor correcto  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }else if(tokens.get(i+1).getLexicalComp().equals("C_SIMPLE")){
+                    if(!identifiers.get(getIndexStruct(struct)).type.equals("char")){
+                        errors.add(new ErrorLSSL(42, " --- Error Semantico({}): La funcion "+struct+" no esta retornando un valor correcto  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }else if(tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
+                    if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == true){
+                        if(!getVar(struct, tokens.get(i+1).getLexeme()).saved.equals("NULL")){
+                            if(!getVar(struct, tokens.get(i+1).getLexeme()).type.equals(identifiers.get(getIndexStruct(struct)).type)){
+                                errors.add(new ErrorLSSL(43, " --- Error Semantico({}): La funcion "+struct+" no esta retornando un valor correcto  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+                        }else{
+                            errors.add(new ErrorLSSL(43, " --- Error Semantico({}): La variable retornada en la funcion "+struct+" no esta definida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }else{
+                        errors.add(new ErrorLSSL(41, " --- Error Semantico({}): La variable retornada en la funcion "+struct+" no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+            }
+            
+            //Para revisar que las variables sean correctas en una llamada de la funcion
+            if(t.getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+1).getLexicalComp().equals("PARENTESIS_A")){
+                if(!tokens.get(i+2).getLexicalComp().equals("SIMB_SENT")){
+                    if(existFunction(t.getLexeme()) == true){
+                        if(checkFunctionCall(tokens, i, struct, t.getLexeme(), errors, p) == false){
+                            errors.add(new ErrorLSSL(31, " --- Error Semantico({}): Error en los valores de los parametros  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }else{
+                        errors.add(new ErrorLSSL(32, " --- Error Semantico({}): La funcion no ha sido declarada  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+            }
+            
             //Para guardar las variables en los parametros
             if(t.getLexicalComp().equals("SIMB_SENT")){
                 if(tokens.get(i+1).getLexicalComp().equals("INT") | tokens.get(i+1).getLexicalComp().equals("FLOAT") 
                         | tokens.get(i+1).getLexicalComp().equals("CHAR") | tokens.get(i+1).getLexicalComp().equals("CADENA")){
                     
-                    addIdentifier(struct, createVar(tokens.get(i+2).getLexeme(), tokens.get(i+1).getLexeme()));
+                    Variable v = createVar(tokens.get(i+2).getLexeme(), tokens.get(i+1).getLexeme(),"NULL");
+                    addIdentifier(struct, v);
+                    identifiers.get(getIndexStruct(struct)).addParam(v);
                 }
             }
             
+            //Para guardar todas las variables con declaracion simple, Ejemplo: int a; , float b , etc
+            if(t.getLexicalComp().equals("INT") | t.getLexicalComp().equals("FLOAT") | t.getLexicalComp().equals("CHAR") | t.getLexicalComp().equals("CADENA")){
+                if(tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+2).getLexicalComp().equals("PUNTO_COMA")){
+                    //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                    if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),"NULL"));
+                    }
+                    else{
+                        errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+            }
+            
+            int indexStruct = 0;
+            int indexVar = 0;
             //Asignaciones, Ejemplo: a = b;
-            if(t.getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+1).getLexicalComp().equals("ASIGNACION")){
+            if(t.getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+1).getLexicalComp().equals("ASIGNACION") && 
+            (!tokens.get(i-1).getLexicalComp().equals("INT") && !tokens.get(i-1).getLexicalComp().equals("FLOAT") && 
+            !tokens.get(i-1).getLexicalComp().equals("CADENA") && !tokens.get(i-1).getLexicalComp().equals("CHAR"))){
                 if(tokens.get(i+2).getLexicalComp().equals("IDENTIFICADOR")){
+                    //comprueba que las variables existan
                     if(existIdentifier(struct, t.getLexeme()) && existIdentifier(struct, tokens.get(i+2).getLexeme())){
                         if(isCorrectAsign(struct, t.getLexeme(), tokens.get(i+2).getLexeme()) == false){
                             errors.add(new ErrorLSSL(10, " --- Error Semantico({}): El tipo de dato de las variables no coincide  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }else{
+                            indexStruct = getIndexStruct(struct);
+                            indexVar = getIndexVar(indexStruct, t.getLexeme());
+                            identifiers.get(indexStruct).words.get(indexVar).saved = getVar(struct, tokens.get(i+2).getLexeme()).saved;
+                        }
+                    }else{
+                        errors.add(new ErrorLSSL(11, " --- Error Semantico({}): La variable no a sido declarada  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }else if(tokens.get(i+2).getLexicalComp().equals("NUMERO")){
+                    if(existIdentifier(struct, t.getLexeme())){
+                        if(getVar(struct, t.getLexeme()).type.equals("int") || getVar(struct, t.getLexeme()).type.equals("float")){
+                            indexStruct = getIndexStruct(struct);
+                            indexVar = getIndexVar(indexStruct, t.getLexeme());
+                            identifiers.get(indexStruct).words.get(indexVar).saved = tokens.get(i+2).getLexeme();
+                        }else{
+                            errors.add(new ErrorLSSL(11, " --- Error Semantico({}): El valor no coincide con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }else{
+                        errors.add(new ErrorLSSL(11, " --- Error Semantico({}): La variable no a sido declarada  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }else if(tokens.get(i+2).getLexicalComp().equals("COMILLAS")){
+                    if(existIdentifier(struct, t.getLexeme())){
+                        if(getVar(struct, t.getLexeme()).type.equals("string")){
+                            indexStruct = getIndexStruct(struct);
+                            indexVar = getIndexVar(indexStruct, t.getLexeme());
+                            identifiers.get(indexStruct).words.get(indexVar).saved = "\""+tokens.get(i+3).getLexeme()+"\"";
+                        }else{
+                            errors.add(new ErrorLSSL(11, " --- Error Semantico({}): El valor no coincide con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }else{
+                        errors.add(new ErrorLSSL(11, " --- Error Semantico({}): La variable no a sido declarada  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }else if(tokens.get(i+2).getLexicalComp().equals("C_SIMPLE")){
+                    if(existIdentifier(struct, t.getLexeme())){
+                        if(getVar(struct, t.getLexeme()).type.equals("char")){
+                            indexStruct = getIndexStruct(struct);
+                            indexVar = getIndexVar(indexStruct, t.getLexeme());
+                            identifiers.get(indexStruct).words.get(indexVar).saved = "\""+tokens.get(i+3).getLexeme()+"\"";
+                        }else{
+                            errors.add(new ErrorLSSL(11, " --- Error Semantico({}): El valor no coincide con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                         }
                     }else{
                         errors.add(new ErrorLSSL(11, " --- Error Semantico({}): La variable no a sido declarada  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
@@ -66,22 +173,26 @@ public class SemanticAnalysis {
                 }
             }
 
-            //Variables int
+            //Variables int y float
             //declaracion simple   
-            if(t.getLexeme().equals("int"))
+            if(t.getLexeme().equals("int") || t.getLexeme().equals("float"))
             {
-                //declaracion simple
-                if(tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+2).getLexicalComp().equals("PUNTO_COMA")){
-                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
-                }
                 //declaracion con asignacion
-                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexeme().equals(";"))
+                if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexeme().equals(";"))
                 {
+                    //se asigna un numero
                     if(tokens.get(i+3).getLexicalComp().equals("NUMERO"))
                     {
-                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
+                        //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                        if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                            addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                        }
+                        else{
+                            errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
                     }
                     
+                    //se asigna una variable
                     /*** Comprobacion de un nombre de variable ***/
                     else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
                         //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
@@ -90,7 +201,7 @@ public class SemanticAnalysis {
                             if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
                                 //Comprobar si el tipo de dato de la variable asignada es correcto
                                 if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
-                                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
+                                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
                                 }else{
                                     errors.add(new ErrorLSSL(5, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                                 }
@@ -102,192 +213,273 @@ public class SemanticAnalysis {
                             errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                         }
                     }
+                                        
                     /*** Error general de tipo ***/
-                    
                     else{
                         errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
                 }
-                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+6).getLexicalComp().equals("PUNTO_COMA"))
-                {
-                    
-                        errors.add(new ErrorLSSL(3, " --- Error Semantico({}): no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
-                        
-                    
+                
+                //se asigna una operacion aritmetica
+                //ambos operandos numero
+                else if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
+                    //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                    if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()+"+"+tokens.get(i+5).getLexeme()));                            
+                    }else{
+                        errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
                 }
-                //declaracion y asignacion con operacion aritmetica
-                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT"))
+                //primer operando numero, segundo variable
+                else if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
+                    //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                    if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                        //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                        if(existIdentifier(struct, tokens.get(i+5).getLexeme()) == true){
+                            //Comprobar si el tipo de dato de la variable asignada es correcto
+                            if(isCorrectType(struct, tokens.get(i+5).getLexeme(), t.getLexeme()) == true){
+                                addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()+"+"+tokens.get(i+5).getLexeme()));
+                            }else{
+                                errors.add(new ErrorLSSL(5, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+                        }else{
+                            errors.add(new ErrorLSSL(6, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+
+                    }else{
+                        errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+
+                //primer operando variable, segundo numero o variable
+                else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
+                    //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                    if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                        //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                        if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
+                            //Comprobar si el tipo de dato de la variable asignada es correcto
+                            if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
+                                //si el segundo operando tambien es una variable
+                                if(tokens.get(i+5).getLexicalComp().equals("IDENTIFICADOR"))
+                                {
+
+                                        //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                                        if(existIdentifier(struct, tokens.get(i+5).getLexeme()) == true){
+                                            //Comprobar si el tipo de dato de la variable asignada es correcto
+                                            if(isCorrectType(struct, tokens.get(i+5).getLexeme(), t.getLexeme()) == true){
+                                                addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()+"+"+tokens.get(i+5).getLexeme()));
+                                            }else{
+                                                errors.add(new ErrorLSSL(5, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                            }
+                                        }else{
+                                            errors.add(new ErrorLSSL(6, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                        }
+                                }
+                                //si el seugndo operando es un numero
+                                else if(tokens.get(i+5).getLexicalComp().equals("NUMERO"))
+                                {
+                                   addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()+"+"+tokens.get(i+5).getLexeme())); 
+                                }
+                            }else{
+                                errors.add(new ErrorLSSL(5, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+                        }else{
+                            errors.add(new ErrorLSSL(6, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+
+                    }else{
+                        errors.add(new ErrorLSSL(7, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
+                }
+            }
+            
+            //variables char
+            if(t.getLexeme().equals("char")){
+                //declaracion con asignacion
+                
+                //asignacion tipo char a = 'a';
+                if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+3).getLexeme().equals("'"))
                 {
-                    if(tokens.get(i+5).getLexicalComp().equals("COMILLAS") || tokens.get(i+5).getLexicalComp().equals("C_SIMPLE"))
-                    {
-                        errors.add(new ErrorLSSL(3, " --- Error Semantico({}): El segundo operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
-                        
+                    //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                    if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                        if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+6).getLexeme().equals(";")){
+                            //comprobar que solo almacene 1 caracter
+                            if(tokens.get(i+4).getLexeme().length() == 1)
+                            {
+                                addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),"'"+tokens.get(i+4).getLexeme()+"'")); 
+                            }
+                            else
+                            {
+                                errors.add(new ErrorLSSL(20, " --- Error Semantico({}): Las variables char solo pueden almacenar 1 caracter  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+                        }
                     }
                     else
                     {
-                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme()));
+                        errors.add(new ErrorLSSL(21, " --- Error Semantico({}): La variable ya existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
                 }
-                else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+6).getLexicalComp().equals("OP_ARIT"))
-                {
-                    errors.add(new ErrorLSSL(2, " --- Error Semantico({}): El primer operando no es un tipo de dato valido  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));  
-                }
                 
-            }
-            /*
-            //Variables char
-            //declaracion con asignacion
-            if(t.getLexeme().equals("char") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
-                //correcto
-                if(tokens.get(i+4).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+4).getLexeme().length() == 1){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme());
-                //tipo de dato incorrecto
-                }else{
-                    errors.add(new ErrorLSSL(3, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                //asignacion tipo char a = b ;
+                //se asigna una variable
+                /*** Comprobacion de un nombre de variable ***/
+                else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
+                    //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                    if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                        //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                        if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
+                            //Comprobar si el tipo de dato de la variable asignada es correcto
+                            if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
+                                addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                            }else{
+                                errors.add(new ErrorLSSL(22, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+                        }else{
+                            errors.add(new ErrorLSSL(23, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+
+                    }else{
+                        errors.add(new ErrorLSSL(24, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                    }
                 }
-            //declaracion con concatenacion
-            }else if(t.getLexeme().equals("char") && tokens.get(i+6).getLexeme().equals("+")){
-                //correcta
-                if(tokens.get(i+4).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+8).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+4).getLexeme().length() == 1 && tokens.get(i+8).getLexeme().length() == 1){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme());
-                //uno de los operadores es un tipo de dato erroneo
-                }else{
-                    errors.add(new ErrorLSSL(3, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            //declaracion simple
-            }else if(t.getLexeme().equals("char") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
-                addIdentifier(struct, tokens.get(i+1).getLexeme());
             }
             
-            //variables long
-            //declaracion y asignacion
-            if(t.getLexeme().equals("long") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato incorrecto
-                }else{
-                    errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+             //Variables string
+            //declaracion simple   
+            if(t.getLexeme().equals("string"))
+            {
+                try{
+                    //se asigna una variable
+                    if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+4).getLexicalComp().equals("PUNTO_COMA")){
+
+                        /*** Comprobacion de un nombre de variable ***/
+                        if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
+                            //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                            if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                                //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                                if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
+                                    //Comprobar si el tipo de dato de la variable asignada es correcto
+                                    if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
+                                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                                    }else{
+                                        errors.add(new ErrorLSSL(32, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                    }
+                                }else{
+                                    errors.add(new ErrorLSSL(33, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                }
+
+                            }else{
+                                errors.add(new ErrorLSSL(34, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+                        }
+
+                        /*** Error general de tipo ***/
+                        else{
+                            errors.add(new ErrorLSSL(35, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }
+
+                    //se asigna una concatenacion
+                    //primer operando variable, segundo cadena o variable
+                    else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+4).getLexeme().equals("+")){
+                        //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                        if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                            //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                            if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
+                                //Comprobar si el tipo de dato de la variable asignada es correcto
+                                if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
+                                    //si el segundo operando tambien es una variable
+                                    if(tokens.get(i+5).getLexicalComp().equals("IDENTIFICADOR"))
+                                    {
+
+                                            //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                                            if(existIdentifier(struct, tokens.get(i+5).getLexeme()) == true){
+                                                //Comprobar si el tipo de dato de la variable asignada es correcto
+                                                if(isCorrectType(struct, tokens.get(i+5).getLexeme(), t.getLexeme()) == true){
+                                                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()+"+"+tokens.get(i+5).getLexeme()));
+                                                }else{
+                                                    errors.add(new ErrorLSSL(40, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                                }
+                                            }else{
+                                                errors.add(new ErrorLSSL(41, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                            }
+                                    }
+                                    //si el seugndo operando es una cadena
+                                    else if(tokens.get(i+5).getLexicalComp().equals("COMILLAS"))
+                                    {
+                                       addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()+"+\""+tokens.get(i+6).getLexeme()+"\"")); 
+                                    }
+                                }else{
+                                    errors.add(new ErrorLSSL(42, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                }
+                            }else{
+                                errors.add(new ErrorLSSL(43, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+
+                        }else{
+                            errors.add(new ErrorLSSL(44, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }
+                    //declaracion con asignacion, cadena
+                    else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+3).getLexicalComp().equals("COMILLAS") && tokens.get(i+6).getLexicalComp().equals("PUNTO_COMA"))
+                    {
+
+                            //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                            if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                                addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(),t.getLexeme(),"\""+tokens.get(i+4).getLexeme()+"\""));
+                            }
+                            else{
+                                errors.add(new ErrorLSSL(31, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+
+                    //se asigna una variable
+                    }
+                    //usa un operador que no es +
+                    else if((tokens.get(i+6).getLexicalComp().equals("OP_ARIT") && !tokens.get(i+6).getLexeme().equals("+")) || (tokens.get(i+4).getLexicalComp().equals("OP_ARIT") && !tokens.get(i+4).getLexeme().equals("+")))
+                    {
+                       errors.add(new ErrorLSSL(45, " --- Error Sintactico({}): Para concatenar utilizar el simbolo +  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true)); 
+                    }
+                    //primer operando cadena, segundo variable
+                    else if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+3).getLexicalComp().equals("COMILLAS") && tokens.get(i+6).getLexeme().equals("+") && tokens.get(i+7).getLexicalComp().equals("IDENTIFICADOR")){
+                        //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                        if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                            //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
+                            if(existIdentifier(struct, tokens.get(i+7).getLexeme()) == true){
+                                //Comprobar si el tipo de dato de la variable asignada es correcto
+                                if(isCorrectType(struct, tokens.get(i+7).getLexeme(), t.getLexeme()) == true){
+                                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),"\""+tokens.get(i+4).getLexeme()+"\""+tokens.get(i+7).getLexeme()));
+                                }else{
+                                    errors.add(new ErrorLSSL(37, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                }
+                            }else{
+                                errors.add(new ErrorLSSL(38, " --- Error Semantico({}): La variable asignada no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }
+
+                        }else{
+                            errors.add(new ErrorLSSL(39, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }
+                    //ambos operandos cadenas
+                    else if(tokens.get(i+3).getLexicalComp().equals("COMILLAS") && tokens.get(i+6).getLexeme().equals("+") && tokens.get(i+7).getLexicalComp().equals("COMILLAS")){
+                        //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                        if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
+                            addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),"\""+tokens.get(i+4).getLexeme()+"\"+\""+tokens.get(i+8).getLexeme()+"\""));                            
+                        }else{
+                            errors.add(new ErrorLSSL(36, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        }
+                    }
                 }
-            //asignacion de una operacion aritmetica
-            }else if(t.getLexeme().equals("long") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato erroneo
-                }else{
-                    errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Operador no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                catch(Exception e)
+                {
+                    System.out.println(e);
                 }
             }
-            //declaracion
-            else if(t.getLexeme().equals("long") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
-                addIdentifier(struct, tokens.get(i+1).getLexeme());
-            }
-            
-            //variable float
-            //declaracion y asignacion
-            if(t.getLexeme().equals("float") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato incorrecto
-                }else{
-                    errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            //asignacion de una operacion aritmetica
-            }else if(t.getLexeme().equals("float") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato erroneo
-                }else{
-                    errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Operador no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            }
-            //declaracion
-            else if(t.getLexeme().equals("float") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
-                addIdentifier(struct, tokens.get(i+1).getLexeme());
-            }
-            
-            //variable double
-            //declaracion y asignacion
-            if(t.getLexeme().equals("double") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato incorrecto
-                }else{
-                    errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            //asignacion de una operacion aritmetica
-            }else if(t.getLexeme().equals("double") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato erroneo
-                }else{
-                    errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Operador no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            }
-            //declaracion
-            else if(t.getLexeme().equals("double") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
-                addIdentifier(struct, tokens.get(i+1).getLexeme());
-            }
-            
-            
-            //Variables int
-            //declaracion y asignacion
-            if(t.getLexeme().equals("int") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato incorrecto
-                }else{
-                    errors.add(new ErrorLSSL(1, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            //asignacion de una operacion aritmetica
-            }else if(t.getLexeme().equals("int") && tokens.get(i+4).getLexicalComp().equals("OP_ARIT")){
-                //correcta
-                if(tokens.get(i+3).getLexicalComp().equals("NUMERO") && tokens.get(i+5).getLexicalComp().equals("NUMERO")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                //tipo de dato erroneo
-                }else{
-                    errors.add(new ErrorLSSL(11, " --- Error Semantico({}): Operador no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            }
-            //declaracion
-            else if(t.getLexeme().equals("int") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
-                addIdentifier(struct, tokens.get(i+1).getLexeme());
-            }
-            
-            //Variables string
-            //declaracion con asignacion
-            if(t.getLexeme().equals("string") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
-                //correcto
-                if(tokens.get(i+4).getLexicalComp().equals("IDENTIFICADOR")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme()); 
-                }else{
-                    errors.add(new ErrorLSSL(2, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            //declaracion con concatenacion
-            }else if(t.getLexeme().equals("string") && tokens.get(i+6).getLexeme().equals("+")){
-                //correcta
-                if(tokens.get(i+4).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+8).getLexicalComp().equals("IDENTIFICADOR")){
-                    addIdentifier(struct, tokens.get(i+1).getLexeme());
-                //uno de los operadores es un tipo de dato erroneo
-                }else{
-                    errors.add(new ErrorLSSL(3, " --- Error Semantico({}): Valor no compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                }
-            //declaracion simple
-            }else if(t.getLexeme().equals("string") && tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
-                addIdentifier(struct, tokens.get(i+1).getLexeme());
-            }
-            */
         }
     }
     
     public void showStructs(){
         for(int i = 0; i < identifiers.size(); i++){
+            System.out.print(identifiers.get(i).type + " ");
             identifiers.get(i).showIdentifiers();
         }
     }
@@ -296,6 +488,16 @@ public class SemanticAnalysis {
     public int getIndexStruct(String struct){
         for(int i = 0; i < identifiers.size(); i++){
             if(identifiers.get(i).structName.equals(struct)){
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    public int getIndexVar(int indexStruct, String name){
+        ArrayList<Variable> vars = identifiers.get(indexStruct).words;
+        for(int i = 0; i < vars.size(); i++){
+            if(vars.get(i).name.equals(name)){
                 return i;
             }
         }
@@ -326,8 +528,8 @@ public class SemanticAnalysis {
         } 
     }
     
-    public Variable createVar(String nom, String type){
-        Variable v = new Variable(nom, type);
+    public Variable createVar(String nom, String type, String save){
+        Variable v = new Variable(nom, type,save);
         return v;
     }
     
@@ -338,6 +540,15 @@ public class SemanticAnalysis {
         
         for(int i = 0; i < idfs.size(); i++){
             if(name.equals(idfs.get(i).name)){
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public boolean existFunction(String name){
+        for(int i = 0; i < identifiers.size(); i++){
+            if(identifiers.get(i).structName.equals(name)){
                 return true;
             }
         }
@@ -369,4 +580,65 @@ public class SemanticAnalysis {
         return false;
     }
     
+    
+    public boolean checkFunctionCall(ArrayList<Token> tokens, int index, String struct, String structFunct, ArrayList<ErrorLSSL> errors, Production p){
+        int i = index+1;
+        int parmPosition = 0; 
+        ArrayList<Variable> params = identifiers.get(getIndexStruct(structFunct)).params;
+        
+        while(!tokens.get(i).getLexicalComp().equals("PARENTESIS_C")){
+            Token t = tokens.get(i);
+            if(parmPosition < params.size()){
+                if(tokens.get(i).getLexicalComp().equals("IDENTIFICADOR")){
+                    if(existIdentifier(struct, tokens.get(i).getLexeme()) == false){
+                        errors.add(new ErrorLSSL(33, " --- Error Semantico({}): La variable "+tokens.get(i).getLexeme()+" no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        return false;
+                    }else if(!params.get(parmPosition).type.equals(getVar(struct, tokens.get(i).getLexeme()).type)){
+                        errors.add(new ErrorLSSL(33, " --- Error Semantico({}): El tipo de dato de la variable "+tokens.get(i).getLexeme()+" no coincide [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        return false;
+                    }else if(getVar(struct, tokens.get(i).getLexeme()).saved.equals("NULL")){
+                        errors.add(new ErrorLSSL(33, " --- Error Semantico({}): La variable "+tokens.get(i).getLexeme()+" es nula  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        return false;
+                    }else{
+                        parmPosition++;
+                    }
+                }
+                else if(tokens.get(i).getLexicalComp().equals("NUMERO")){
+                    if(!params.get(parmPosition).type.equals("int") && !params.get(parmPosition).type.equals("float")){
+                        return false;
+                    }else{
+                        parmPosition++;
+                    }
+                }else if(tokens.get(i).getLexicalComp().equals("COMILLAS") &&
+                        (tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR") || tokens.get(i+1).getLexicalComp().equals("NUMERO")) &&
+                        tokens.get(i+2).getLexicalComp().equals("COMILLAS")){
+                    i+=2;
+                    if(!params.get(parmPosition).type.equals("string")){
+                        return false;
+                    }else{
+                        parmPosition++;
+                    }
+                }else if(tokens.get(i).getLexicalComp().equals("C_SIMPLE") &&
+                        (tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR") || tokens.get(i+1).getLexicalComp().equals("NUMERO")) &&
+                        tokens.get(i+2).getLexicalComp().equals("C_SIMPLE")){
+                    i+=2;
+                    if(!params.get(parmPosition).type.equals("char")){
+                        return false;
+                    }else{
+                        parmPosition++;
+                    }
+                }
+            }else{
+                return false;
+            }
+            
+            i++;
+        }
+        if(parmPosition < params.size()){
+            return false;
+        }
+        return true;
+    }
+    
+  
 }
