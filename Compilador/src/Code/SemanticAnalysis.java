@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class SemanticAnalysis {
     
     ArrayList<Identifier> identifiers;
+    boolean headerIndicator = false;
     
     public SemanticAnalysis(){
         identifiers = new ArrayList<>();
@@ -21,20 +22,39 @@ public class SemanticAnalysis {
         for(int i = 0; i < productions.size(); i++){
             Production p = productions.get(i);  
             //se separa el scope de las variables, global o de una funcion
+            if(p.lexicalCompRank(0).equals("IMPORT")){
+                if(p.lexemeRank(1).equals("BASIC")){
+                    headerIndicator = true;
+                }else{
+                    errors.add(new ErrorLSSL(80, " --- Error Semantico({}): La libreria importada no existe  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
+                }
+            }
+            
+            
             if(p.lexicalCompRank(0).equals("MAIN")){
-                struct = "MAIN";
-                addIdentifier(struct, createVar("NULL", "NULL","NULL"));
-                identifiers.get(getIndexStruct(struct)).type = "void";
-                structAnalysis(p, errors, struct);
-            }else if(p.lexicalCompRank(0).equals("GATO") && p.lexicalCompRank(2).equals("IDENTIFICADOR")){
-                struct = p.lexemeRank(2);
-                if(existFunction(struct) == false){
+                if(headerIndicator == true){
+                    struct = "MAIN";
                     addIdentifier(struct, createVar("NULL", "NULL","NULL"));
-                    identifiers.get(getIndexStruct(struct)).type = p.lexemeRank(1);
+                    identifiers.get(getIndexStruct(struct)).type = "void";
                     structAnalysis(p, errors, struct);
                 }else{
-                    errors.add(new ErrorLSSL(30, " --- Error Semantico({}): La funcion ya existe  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
+                    errors.add(new ErrorLSSL(81, " --- Error Semantico({}): No se ha importado la libreria BASIC  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
                 }
+                
+            }else if(p.lexicalCompRank(0).equals("GATO") && p.lexicalCompRank(2).equals("IDENTIFICADOR")){
+                if(headerIndicator == true){
+                    struct = p.lexemeRank(2);
+                    if(existFunction(struct) == false){
+                        addIdentifier(struct, createVar("NULL", "NULL","NULL"));
+                        identifiers.get(getIndexStruct(struct)).type = p.lexemeRank(1);
+                        structAnalysis(p, errors, struct);
+                    }else{
+                        errors.add(new ErrorLSSL(81, " --- Error Semantico({}): No se ha importado la libreria BASIC  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
+                    }
+                }else{
+                    
+                }
+                
             }
             
         }
@@ -323,8 +343,9 @@ public class SemanticAnalysis {
                 //asignacion tipo char a = b ;
                 //se asigna una variable
                 /*** Comprobacion de un nombre de variable ***/
-                else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
+                /*else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
                     //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
+                    System.out.println("--------");
                     if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
                         //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
                         if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
@@ -341,7 +362,7 @@ public class SemanticAnalysis {
                     }else{
                         errors.add(new ErrorLSSL(24, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
-                }
+                }*/
             }
             
              //Variables string
@@ -537,7 +558,6 @@ public class SemanticAnalysis {
     public boolean existIdentifier(String struct, String name){
         int index = getIndexStruct(struct);
         ArrayList<Variable> idfs = identifiers.get(index).words;
-        
         for(int i = 0; i < idfs.size(); i++){
             if(name.equals(idfs.get(i).name)){
                 return true;

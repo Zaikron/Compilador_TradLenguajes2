@@ -19,6 +19,15 @@ public class SintacticAnalysis {
         g.finalLineColumn();
         //g.initialLineColumn();
         
+        
+        //Import
+        g.group("CABECERA", "IMPORT IDENTIFICADOR PUNTO_COMA", productions);
+            //Incorrectas
+        g.group("CABECERA", "IMPORT IDENTIFICADOR", true,
+                201, "Error Sintactico({}): Falta punto y coma (cabecera)  [Linea: #, Caracter: %]");
+        g.group("CABECERA", "IMPORT PUNTO_COMA", true,
+                202, "Error Sintactico({}): Falta la libreria (cabecera)  [Linea: #, Caracter: %]");
+            
         //Declaracion de funcion
         g.group("DEC_FUNCION", "GATO VOID IDENTIFICADOR");
                     //Incorrectos: void
@@ -90,7 +99,7 @@ public class SintacticAnalysis {
         /*Declaraciones: Enteros */
                 //Correctos
         g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) "
-                + "OP_ARIT (IDENTIFICADOR | NUMERO) PUNTO_COMA", true, productions);//7
+                + "(OP_ARIT (IDENTIFICADOR | NUMERO))* PUNTO_COMA", true, productions);//7
         g.group("DECLARACION", "INT IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO) PUNTO_COMA", true, productions);//5
         g.group("DECLARACION", "INT IDENTIFICADOR PUNTO_COMA", true, productions);//3
         
@@ -229,39 +238,51 @@ public class SintacticAnalysis {
                 
         /* Sentencia boleana|*/
                 //Correctos;
-        g.group("BOLEANA", "SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+        g.group("BOLEANA", "SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
                 + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)) "
-                + "OP_LOGICO SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
-                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))+", false);
+                + "(OP_LOGICO SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)))+", false);
         
         g.group("BOLEANA", "SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
                 + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))", true); 
 
         g.group("BOLEANA", "SIMB_SENT  OP_BOOL", true);
                 //Incorrectos
-        g.group("BOLEANA", "IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+        g.group("BOLEANA", "(OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
                 + "| COMILLAS COMILLAS | COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)", true,
                 30, "Error Sintactico({}): Falta el simbolo($) de variables en sentencias (bool) [Linea: #, Caracter: %]");
-        g.group("BOLEANA", "SIMB_SENT IDENTIFICADOR OP_RELACIONAL", true,
+        g.group("BOLEANA", "SIMB_SENT (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL", true,
                 30, "Error Sintactico({}): Falto el valor a relacionar (bool) [Linea: #, Caracter: %]");
         
-        g.group("BOLEANA", "(NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+        g.group("BOLEANA", "(NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
                 + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)) "
-                + "OP_LOGICO SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
-                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))+", true,
+                + "(OP_LOGICO SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)))+", true,
                 32, "Error Sintactico({}): Falta el simbolo($) de variables en sentencias (bool) [Linea: #, Caracter: %]");
-        g.group("BOLEANA", "SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+        g.group("BOLEANA", "SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
                 + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)) "
-                + "OP_LOGICO (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
-                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))+", true,
+                + "(OP_LOGICO (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)))+", true,
                 32, "Error Sintactico({}): Falta el simbolo($) de variables en sentencias (bool) [Linea: #, Caracter: %]");
-        g.group("BOLEANA", "SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL "
-                + "OP_LOGICO SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
-                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))+", true,
+        g.group("BOLEANA", "SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL "
+                + "(OP_LOGICO SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)))+", true,
                 31, "Error Sintactico({}): Falto la sentencia (bool) [Linea: #, Caracter: %]");
-        g.group("BOLEANA", "SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
-                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)) "
-                + "OP_LOGICO SIMB_SENT (NEG)? IDENTIFICADOR OP_RELACIONAL", true,
+        g.group("BOLEANA", "SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL (OP_BOOL | NUMERO | IDENTIFICADOR "
+                + "| COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS)) OP_LOGICO"
+                + "OP_LOGICO SIMB_SENT (NEG)? (OP_BOOL | NUMERO | IDENTIFICADOR | COMILLAS COMILLAS | (COMILLAS (IDENTIFICADOR | NUMERO) COMILLAS))"
+                + " OP_RELACIONAL", true,
                 31, "Error Sintactico({}): Falto la sentencia (bool) [Linea: #, Caracter: %]");
         
         

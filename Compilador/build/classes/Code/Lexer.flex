@@ -71,6 +71,9 @@ Numero = 0 | [1-9][0-9]*
 /* Palabra reservada Return */
 ( return ) {return token(yytext(), "RETURN", yyline, yycolumn);}
 
+/* Palabra reservada import */
+( import ) {return token(yytext(), "IMPORT", yyline, yycolumn);}
+
 /* Palabra reservada Void */
 ( void ) {return token(yytext(), "VOID", yyline, yycolumn);}
 
