@@ -30,7 +30,6 @@ public class SemanticAnalysis {
                 }
             }
             
-            
             if(p.lexicalCompRank(0).equals("MAIN")){
                 if(headerIndicator == true){
                     struct = "MAIN";
@@ -49,16 +48,13 @@ public class SemanticAnalysis {
                         identifiers.get(getIndexStruct(struct)).type = p.lexemeRank(1);
                         structAnalysis(p, errors, struct);
                     }else{
-                        errors.add(new ErrorLSSL(81, " --- Error Semantico({}): No se ha importado la libreria BASIC  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
+                        errors.add(new ErrorLSSL(81, " --- Error Semantico({}): El nombre de la funcion "+struct+" ya existe  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
                     }
                 }else{
-                    
+                   errors.add(new ErrorLSSL(81, " --- Error Semantico({}): No se ha importado la libreria BASIC  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true)); 
                 }
-                
             }
-            
         }
-        
         showStructs();
     }
     //la comprobacion que tenga un i+numero mas bajo siempre va hasta arriba, y conforme mas grande el numero, mas abajo
@@ -66,8 +62,6 @@ public class SemanticAnalysis {
         ArrayList<Token> tokens = p.getTokens();
         for(int i = 0; i < tokens.size(); i++){
             Token t = tokens.get(i);  //Token actual
-            //System.out.println("Simbolo: " + t.getLexeme());
-            //System.out.println("NombreToken: " + t.getLexicalComp());
             
             //Comprobacion de que se retorne el tipo correcto en una funcion
             if(t.getLexicalComp().equals("RETURN")){
@@ -147,9 +141,13 @@ public class SemanticAnalysis {
                         if(isCorrectAsign(struct, t.getLexeme(), tokens.get(i+2).getLexeme()) == false){
                             errors.add(new ErrorLSSL(10, " --- Error Semantico({}): El tipo de dato de las variables no coincide  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                         }else{
-                            indexStruct = getIndexStruct(struct);
-                            indexVar = getIndexVar(indexStruct, t.getLexeme());
-                            identifiers.get(indexStruct).words.get(indexVar).saved = getVar(struct, tokens.get(i+2).getLexeme()).saved;
+                            if(getVar(struct, tokens.get(i+2).getLexeme()).saved.equals("NULL")){
+                                errors.add(new ErrorLSSL(12, " --- Error Semantico({}): La variable "+tokens.get(i+2).getLexeme()+" es nula  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                            }else{
+                                indexStruct = getIndexStruct(struct);
+                                indexVar = getIndexVar(indexStruct, t.getLexeme());
+                                identifiers.get(indexStruct).words.get(indexVar).saved = getVar(struct, tokens.get(i+2).getLexeme()).saved;
+                            }
                         }
                     }else{
                         errors.add(new ErrorLSSL(11, " --- Error Semantico({}): La variable no a sido declarada  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
@@ -214,14 +212,18 @@ public class SemanticAnalysis {
                     
                     //se asigna una variable
                     /*** Comprobacion de un nombre de variable ***/
-                    else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
+                    else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
                         //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
                         if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
                             //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
                             if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
                                 //Comprobar si el tipo de dato de la variable asignada es correcto
                                 if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
-                                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                                    if(getVar(struct, tokens.get(i+3).getLexeme()).saved.equals("NULL")){
+                                        errors.add(new ErrorLSSL(12, " --- Error Semantico({}): La variable "+tokens.get(i+3).getLexeme()+" es nula  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                    }else{
+                                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                                    }
                                 }else{
                                     errors.add(new ErrorLSSL(5, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                                 }
@@ -343,7 +345,7 @@ public class SemanticAnalysis {
                 //asignacion tipo char a = b ;
                 //se asigna una variable
                 /*** Comprobacion de un nombre de variable ***/
-                /*else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
+                else if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
                     //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
                     System.out.println("--------");
                     if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
@@ -351,7 +353,11 @@ public class SemanticAnalysis {
                         if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
                             //Comprobar si el tipo de dato de la variable asignada es correcto
                             if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
-                                addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                                if(getVar(struct, tokens.get(i+3).getLexeme()).saved.equals("NULL")){
+                                    errors.add(new ErrorLSSL(12, " --- Error Semantico({}): La variable "+tokens.get(i+3).getLexeme()+" es nula  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                }else{
+                                    addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                                }
                             }else{
                                 errors.add(new ErrorLSSL(22, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                             }
@@ -360,9 +366,9 @@ public class SemanticAnalysis {
                         }
 
                     }else{
-                        errors.add(new ErrorLSSL(24, " --- Error Semantico({}): La variable esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                        errors.add(new ErrorLSSL(24, " --- Error Semantico({}): La variable "+tokens.get(i+1).getLexeme()+" esta repetida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
-                }*/
+                }
             }
             
              //Variables string
@@ -374,14 +380,18 @@ public class SemanticAnalysis {
                     if(tokens.get(i+2).getLexeme().equals("=") && tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+4).getLexicalComp().equals("PUNTO_COMA")){
 
                         /*** Comprobacion de un nombre de variable ***/
-                        if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR")){
+                        if(tokens.get(i+3).getLexicalComp().equals("IDENTIFICADOR") && tokens.get(i+2).getLexicalComp().equals("ASIGNACION")){
                             //Comprobar existencia de la variable, si es falso entonces se puede agregar, no estara repetida
                             if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == false){
                                 //Comprobar existencia de la variable asignada, pues primero tuvo que ser declarada para poder asignarla
                                 if(existIdentifier(struct, tokens.get(i+3).getLexeme()) == true){
                                     //Comprobar si el tipo de dato de la variable asignada es correcto
                                     if(isCorrectType(struct, tokens.get(i+3).getLexeme(), t.getLexeme()) == true){
-                                        addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                                        if(getVar(struct, tokens.get(i+3).getLexeme()).saved.equals("NULL")){
+                                            errors.add(new ErrorLSSL(12, " --- Error Semantico({}): La variable "+tokens.get(i+3).getLexeme()+" es nula  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                                        }else{
+                                            addIdentifier(struct, createVar(tokens.get(i+1).getLexeme(), t.getLexeme(),tokens.get(i+3).getLexeme()));
+                                        }
                                     }else{
                                         errors.add(new ErrorLSSL(32, " --- Error Semantico({}): La variable no es compatible con el tipo de dato  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                                     }
@@ -566,6 +576,7 @@ public class SemanticAnalysis {
         return false;
     }
     
+    //Comprobar la existencia de una funcion
     public boolean existFunction(String name){
         for(int i = 0; i < identifiers.size(); i++){
             if(identifiers.get(i).structName.equals(name)){
@@ -600,7 +611,7 @@ public class SemanticAnalysis {
         return false;
     }
     
-    
+    //Comprobar que una llamada de la funcion tenga los parametros correctos
     public boolean checkFunctionCall(ArrayList<Token> tokens, int index, String struct, String structFunct, ArrayList<ErrorLSSL> errors, Production p){
         int i = index+1;
         int parmPosition = 0; 

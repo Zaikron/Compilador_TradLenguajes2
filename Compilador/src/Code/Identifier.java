@@ -28,15 +28,16 @@ public class Identifier {
         System.out.println("-----------------------------");
     }
     
+    //Agregar una variable y funcion nuevas
     public void addNew(String struct, Variable idf){
         structName = struct;
         words.add(idf);
     }
-    
+    //Agregar solo una variable nueva en una funcion existente
     public void addExist(Variable idf){
         words.add(idf);
     }
-    
+    //Agregar un parametro
     public void addParam(Variable idf){
         params.add(idf);
     }
