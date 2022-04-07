@@ -79,13 +79,14 @@ public class SemanticAnalysis {
                     }
                 }else if(tokens.get(i+1).getLexicalComp().equals("IDENTIFICADOR")){
                     if(existIdentifier(struct, tokens.get(i+1).getLexeme()) == true){
-                        if(!getVar(struct, tokens.get(i+1).getLexeme()).saved.equals("NULL")){
-                            if(!getVar(struct, tokens.get(i+1).getLexeme()).type.equals(identifiers.get(getIndexStruct(struct)).type)){
+                        if(!getVar(struct, tokens.get(i+1).getLexeme()).type.equals(identifiers.get(getIndexStruct(struct)).type)){
                                 errors.add(new ErrorLSSL(43, " --- Error Semantico({}): La funcion "+struct+" no esta retornando un valor correcto  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                             }
+                        /*if(!getVar(struct, tokens.get(i+1).getLexeme()).saved.equals("NULL")){
+                            
                         }else{
                             errors.add(new ErrorLSSL(43, " --- Error Semantico({}): La variable retornada en la funcion "+struct+" no esta definida  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
-                        }
+                        }*/
                     }else{
                         errors.add(new ErrorLSSL(41, " --- Error Semantico({}): La variable retornada en la funcion "+struct+" no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
                     }
