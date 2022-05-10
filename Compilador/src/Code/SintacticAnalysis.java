@@ -64,37 +64,90 @@ public class SintacticAnalysis {
                 + "(C_SIMPLE (NUMERO | IDENTIFICADOR) C_SIMPLE) | (COMILLAS COMILLAS) | (C_SIMPLE C_SIMPLE)))+)* PARENTESIS_C PUNTO_COMA", true,
                 4, "Error Sintactico({}): Falto coma(s) (llamada funcion) [Linea: #, Caracter: %]");
         
+        /* Print */
+            
+        g.loopForFunExecUntilChangeNotDetected(() -> {
+            //Correctos
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
+                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", true);
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PARENTESIS_C PUNTO_COMA", true);
+            
+            //Incorrectos
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
+                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C", 
+                true,200, "Error Sintactico({}): Falto punto y coma (print)  [Linea: #, Caracter: %]");
+            g.group("IMPRIMIR", "PRINT COMILLAS "
+                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
+                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+                true,200, "Error Sintactico({}): Falto parentesis de apertura (print)  [Linea: #, Caracter: %]");
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
+                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PUNTO_COMA", 
+                true,200, "Error Sintactico({}): Falto parentesis de cierre (print)  [Linea: #, Caracter: %]");
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A "
+                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
+                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+                true,200, "Error Sintactico({}): Faltaron comillas (print)  [Linea: #, Caracter: %]");
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
+                + "(OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+                true,200, "Error Sintactico({}): Faltaron comillas (print)  [Linea: #, Caracter: %]");
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*)"
+                + "COMILLAS (OP_ARIT (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+                true,200, "Error Sintactico({}): Falto un valor a concatenar (print)  [Linea: #, Caracter: %]");
+            
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PARENTESIS_C", 
+                true,200, "Error Sintactico({}): Falto punto y coma (print)  [Linea: #, Caracter: %]");
+            g.group("IMPRIMIR", "PRINT IDENTIFICADOR PARENTESIS_C PUNTO_COMA", 
+                true,200, "Error Sintactico({}): Falto parentesis de apertura (print)  [Linea: #, Caracter: %]");
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PUNTO_COMA", 
+                true,200, "Error Sintactico({}): Falto parentesis de cierre (print)  [Linea: #, Caracter: %]");
+            
+        });
 
-        /*Declaraciones: Tipos de datos */
+        
+        /* ASM */
                 //Correctos
-        /*g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
-                + "(OP_ARIT (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)))* PUNTO_COMA", true, productions);
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR PUNTO_COMA", true, productions);
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) PUNTO_COMA", true, productions);
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR PUNTO_COMA", true, productions);
+                    //MOV, ADD
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(MOV | ADD) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", true, productions);
+        
                 //Incorrectos
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
-                + "(IDENTIFICADOR | NUMERO)* PUNTO_COMA", true,
-                3, "Error Sintactico({}): Falto un operador (variable)  [Linea: #, Caracter: %]");
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
-                + "OP_ARIT PUNTO_COMA", true,
-                4, "Error Sintactico({}): Falto un identificador (variable)  [Linea: #, Caracter: %]");
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) "
-                + "(OP_ARIT (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)))*", true,
-                5, "Error Sintactico({}): Falto punto y coma (variable)  [Linea: #, Caracter: %]");        
+                    //MOV, ADD
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(MOV | ADD)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PARENTESIS_C", 
+                true,300, "Error Sintactico({}): Falto punto y coma (asm)  [Linea: #, Caracter: %]");
+        g.group("ENSAMBLADOR", "ASM COMILLAS "
+                + "(MOV | ADD)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Falto parentesis de apertura (asm)  [Linea: #, Caracter: %]");
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(MOV | ADD)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Falto parentesis de cierre (asm)  [Linea: #, Caracter: %]");
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A "
+                + "(MOV | ADD)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(MOV | ADD)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(MOV | ADD)  COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(MOV | ADD)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");
         
-        g.group("DECLARACION", "TIPO_DATO PUNTO_COMA", true,
-                6, "Error Sintactico({}): Falto crear un nombre para la variable (variable)  [Linea: #, Caracter: %]");
-        g.group("DECLARACION", "TIPO_DATO ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE)) PUNTO_COMA", true,
-                7, "Error Sintactico({}): Falto crear un nombre para la variable (variable)  [Linea: #, Caracter: %]");
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR ASIGNACION (IDENTIFICADOR | NUMERO | (C_SIMPLE IDENTIFICADOR C_SIMPLE))", true,
-                8, "Error Sintactico({}): Falto ($ o ;) (variable)  [Linea: #, Caracter: %]");
-        g.group("DECLARACION", "TIPO_DATO IDENTIFICADOR", true,
-                9, "Error Sintactico({}): Falto ($ o ;)  (variable)  [Linea: #, Caracter: %]");
         
-                    //Sin declaracion
-        g.group("DECLARACION", "TIPO_DATO", true,
-                10, "Error Sintactico({}): No esta en una declaracion correcta (variable) [Linea: #, Caracter: %]");*/
         
         /*Declaraciones: Enteros */
                 //Correctos
@@ -644,6 +697,6 @@ public class SintacticAnalysis {
         g.group("FOR_C", "FOR PARENTESIS_A SENT_FOR PARENTESIS_C LLAVE_A (SENTENCIA)* LLAVE_C", true);
         g.group("WHILE_C", "WHILE PARENTESIS_A BOLEANA PARENTESIS_C LLAVE_A (SENTENCIA)* LLAVE_C", true);
         
-        g.group("SENTENCIA", "(SENTENCIA | DECLARACION | SENT_IF | SENT_IFELSE | FOR_C | WHILE_C | LLAMADA_FUNCT)*", true);
+        g.group("SENTENCIA", "(SENTENCIA | DECLARACION | SENT_IF | SENT_IFELSE | FOR_C | WHILE_C | LLAMADA_FUNCT | ENSAMBLADOR | IMPRIMIR)*", true);
     }
 }

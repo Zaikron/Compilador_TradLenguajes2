@@ -35,6 +35,23 @@ Numero = 0 | [1-9][0-9]*
 
 {Comentario}|{EspacioEnBlanco} { /*Ignorar*/ }
 
+        /* ASM */
+/* Palabra reservada ASM */
+( asm ) {return token(yytext(), "ASM", yyline, yycolumn);}
+
+/* Registros 16 bits*/
+( "ax" | "bx" | "cx" | "dx" ) {return token(yytext(), "REG_16", yyline, yycolumn);}
+
+/* Registros 8 bits*/
+( "ah" | "al" | "bh" | "bl" | "ch" | "cl" | "dh" | "dl" ) {return token(yytext(), "REG_8", yyline, yycolumn);}
+
+/* Palabra reservada MOV */
+( mov ) {return token(yytext(), "MOV", yyline, yycolumn);}
+
+/* Palabra reservada ADD */
+( add ) {return token(yytext(), "ADD", yyline, yycolumn);}
+
+
 /* Tipo de dato int */
 ( int ) {return token(yytext(), "INT", yyline, yycolumn);}
 
@@ -52,6 +69,9 @@ Numero = 0 | [1-9][0-9]*
 
 /* Comillas Simples */
 \' {return token(yytext(), "C_SIMPLE", yyline, yycolumn);}
+
+/* Palabra reservada print */
+( print ) {return token(yytext(), "PRINT", yyline, yycolumn);}
 
 /* Palabra reservada If */
 ( if ) {return token(yytext(), "IF", yyline, yycolumn);}

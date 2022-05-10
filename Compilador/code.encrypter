@@ -6,9 +6,11 @@ import BASIC;
 	}
 }
 
-#char disminuir($int t, $string nom, $float f, $char c){
-	char a;
-	return a;
+#int disminuir($int x, $string nom, $float f, $char c){
+	for(int i = 0; $i < 10; $i++){
+		x = i;
+	}
+	return x;
 }
 
 main(){
@@ -22,6 +24,10 @@ main(){
 	string s = "hola";
 	int a = b;
 	r = c;
+	
+	asm("mov 9, ax");
+	asm("add 4, ax");
+	asm("mov ax, b");
 
 	incrementar(1, "julio", 54, 'g');
 	disminuir(b, s, f, r);
