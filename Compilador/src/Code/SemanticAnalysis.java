@@ -10,9 +10,12 @@ public class SemanticAnalysis {
     
     ArrayList<Identifier> identifiers;
     boolean headerIndicator = false;
+    Registers regs;
+    MNEMS mnems;
     
     public SemanticAnalysis(){
         identifiers = new ArrayList<>();
+        regs = new Registers();
     }
     
     public void analysis(ArrayList<Production> productions, ArrayList<ErrorLSSL> errors){
@@ -56,12 +59,24 @@ public class SemanticAnalysis {
             }
         }
         showStructs();
+        regs.showRegisters();
     }
     //la comprobacion que tenga un i+numero mas bajo siempre va hasta arriba, y conforme mas grande el numero, mas abajo
     public void structAnalysis(Production p, ArrayList<ErrorLSSL> errors, String struct){
         ArrayList<Token> tokens = p.getTokens();
         for(int i = 0; i < tokens.size(); i++){
             Token t = tokens.get(i);  //Token actual
+            
+            
+            if(t.getLexicalComp().equals("ASM")){
+                System.out.println("mnem: " + tokens.get(i+3).getLexeme());
+                System.out.println("1: " + tokens.get(i+4).getLexeme());
+                System.out.println("2: " + tokens.get(i+6).getLexeme());
+                
+                mnems = new MNEMS(tokens.get(i+3).getLexeme(), tokens.get(i+4).getLexeme(), tokens.get(i+6).getLexeme());
+                mnems.checkMNEMS(regs, tokens, i);
+            }
+            
             
             //Comprobacion de que se retorne el tipo correcto en una funcion
             if(t.getLexicalComp().equals("RETURN")){
