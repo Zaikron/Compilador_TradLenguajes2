@@ -11,6 +11,8 @@ public class MNEMS {
     String val1 = "";
     String val2 = "";
     
+        
+    
     String lexical1;
     String lexical2;
     
@@ -27,15 +29,15 @@ public class MNEMS {
         lexical1 = t.get(i+4).getLexicalComp();
         lexical2 = t.get(i+6).getLexicalComp();
         
-        System.out.println("lex1: " + lexical1);
-        System.out.println("lex2: " + lexical2);
-        
         if(mnem.equals("mov")){
             MOV(regs, errors, p, t.get(i), struct);
         }else if(mnem.equals("add")){
             ADD(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("sub")){
+            SUB(regs, errors, p, t.get(i), struct);
         }
     }
+    
     
     public void MOV(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
         System.out.println("v1: " + val1 + " v2: " + val2);
@@ -61,7 +63,9 @@ public class MNEMS {
             errors.add(new ErrorLSSL(160, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }
     }
-    
+        /*asm("mov 9, ax");
+	asm("add 4, ax");
+	asm("mov ax, b");*/
     public void ADD(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
         int newValue = 0;
         if(isReg(lexical1) && isReg(lexical2)){
@@ -69,6 +73,20 @@ public class MNEMS {
             r.regs.put(val2, String.valueOf(newValue));
         }else if(isNum(lexical1) && isReg(lexical2)){
             newValue = Integer.parseInt(r.regs.get(val2)) + Integer.parseInt(val1);
+            r.regs.put(val2, String.valueOf(newValue));
+        }else{
+            //Error o caso no programado
+            errors.add(new ErrorLSSL(160, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void SUB(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        int newValue = 0;
+        if(isReg(lexical1) && isReg(lexical2)){
+            newValue = Integer.parseInt(r.regs.get(val2)) - Integer.parseInt(r.regs.get(val1));
+            r.regs.put(val2, String.valueOf(newValue));
+        }else if(isNum(lexical1) && isReg(lexical2)){
+            newValue = Integer.parseInt(r.regs.get(val2)) - Integer.parseInt(val1);
             r.regs.put(val2, String.valueOf(newValue));
         }else{
             //Error o caso no programado

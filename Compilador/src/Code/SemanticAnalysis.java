@@ -69,10 +69,6 @@ public class SemanticAnalysis {
             
             
             if(t.getLexicalComp().equals("ASM")){
-                System.out.println("mnem: " + tokens.get(i+3).getLexeme());
-                System.out.println("1: " + tokens.get(i+4).getLexeme());
-                System.out.println("2: " + tokens.get(i+6).getLexeme());
-                
                 mnems = new MNEMS(tokens.get(i+3).getLexeme(), tokens.get(i+4).getLexeme(), tokens.get(i+6).getLexeme(), identifiers);
                 mnems.checkMNEMS(regs, tokens, i, errors, p, struct);
             }

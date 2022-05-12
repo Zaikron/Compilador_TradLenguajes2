@@ -36,20 +36,23 @@ Numero = 0 | [1-9][0-9]*
 {Comentario}|{EspacioEnBlanco} { /*Ignorar*/ }
 
         /* ASM */
-/* Palabra reservada ASM */
-( asm ) {return token(yytext(), "ASM", yyline, yycolumn);}
+    /* Palabra reservada ASM */
+    ( asm ) {return token(yytext(), "ASM", yyline, yycolumn);}
 
-/* Registros 16 bits*/
-( "ax" | "bx" | "cx" | "dx" ) {return token(yytext(), "REG_16", yyline, yycolumn);}
+    /* Registros 16 bits*/
+    ( "ax" | "bx" | "cx" | "dx" ) {return token(yytext(), "REG_16", yyline, yycolumn);}
 
-/* Registros 8 bits*/
-( "ah" | "al" | "bh" | "bl" | "ch" | "cl" | "dh" | "dl" ) {return token(yytext(), "REG_8", yyline, yycolumn);}
+    /* Registros 8 bits*/
+    ( "ah" | "al" | "bh" | "bl" | "ch" | "cl" | "dh" | "dl" ) {return token(yytext(), "REG_8", yyline, yycolumn);}
 
-/* Palabra reservada MOV */
-( mov ) {return token(yytext(), "MOV", yyline, yycolumn);}
+    /* Palabra reservada MOV */
+    ( mov ) {return token(yytext(), "MOV", yyline, yycolumn);}
 
-/* Palabra reservada ADD */
-( add ) {return token(yytext(), "ADD", yyline, yycolumn);}
+    /* Palabra reservada ADD */
+    ( add ) {return token(yytext(), "ADD", yyline, yycolumn);}
+
+    /* Palabra reservada ADD */
+    ( sub ) {return token(yytext(), "SUB", yyline, yycolumn);}
 
 
 /* Tipo de dato int */
