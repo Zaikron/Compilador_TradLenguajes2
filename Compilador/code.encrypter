@@ -26,7 +26,8 @@ main(){
 	r = c;
 	
 	asm("mov 9, ax");
-
+	asm("add 4, ax");
+	asm("mov ax, b");
 
 	incrementar(1, "julio", 54, 'g');
 	disminuir(b, s, f, r);
