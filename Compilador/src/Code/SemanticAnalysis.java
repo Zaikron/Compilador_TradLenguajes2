@@ -5,6 +5,7 @@ import compilerTools.ErrorLSSL;
 import compilerTools.Production;
 import compilerTools.Token;
 import java.util.ArrayList;
+import javax.swing.JTextPane;
 
 public class SemanticAnalysis {
     
@@ -13,12 +14,15 @@ public class SemanticAnalysis {
     Registers regs;
     MNEMS mnems;
     
+    String printText = "";
+    int indexPrint = 0;
+    
     public SemanticAnalysis(){
         identifiers = new ArrayList<>();
         regs = new Registers();
     }
     
-    public void analysis(ArrayList<Production> productions, ArrayList<ErrorLSSL> errors){
+    public void analysis(ArrayList<Production> productions, ArrayList<ErrorLSSL> errors, JTextPane textSintax){
         String struct = "GLOBAL";
         //addIdentifier("MAIN", createVar("c", "char","NULL")); //Variable para pruebas
         
@@ -60,6 +64,7 @@ public class SemanticAnalysis {
         }
         showStructs();
         regs.showRegisters();
+        textSintax.setText(textSintax.getText() + "\n" + printText);
     }
     //la comprobacion que tenga un i+numero mas bajo siempre va hasta arriba, y conforme mas grande el numero, mas abajo
     public void structAnalysis(Production p, ArrayList<ErrorLSSL> errors, String struct){
@@ -68,9 +73,19 @@ public class SemanticAnalysis {
             Token t = tokens.get(i);  //Token actual
             
             
+            
+            //Ensamblador
             if(t.getLexicalComp().equals("ASM")){
                 mnems = new MNEMS(tokens.get(i+3).getLexeme(), tokens.get(i+4).getLexeme(), tokens.get(i+6).getLexeme(), identifiers);
                 mnems.checkMNEMS(regs, tokens, i, errors, p, struct);
+            }
+            
+            //Print
+            if(t.getLexicalComp().equals("PRINT")){
+                String print = getPrintString(tokens, i, struct, errors, p);
+                System.out.println("-----> " + print);
+                printText += (print + "\n");
+                i = indexPrint;
             }
             
             
@@ -681,6 +696,32 @@ public class SemanticAnalysis {
             return false;
         }
         return true;
+    }
+    
+    
+    public String getPrintString (ArrayList<Token> tokens, int index, String struct, ArrayList<ErrorLSSL> errors, Production p){
+        int i = index + 2;
+        String print = "";
+        Variable aux;
+        
+        while(!(tokens.get(i).getLexicalComp().equals("PARENTESIS_C"))){
+            Token t = tokens.get(i);
+            if(existIdentifier(struct, tokens.get(i).getLexeme())){
+                aux = getVar(struct, tokens.get(i).getLexeme());
+                if(!(aux.saved.equals("NULL"))){
+                    print += aux.saved + " ";
+                }else{
+                    errors.add(new ErrorLSSL(300, " --- Error Semantico({}): La variable es nula [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                }
+            }else{
+                if(!(tokens.get(i).getLexicalComp().equals("COMILLAS")) && !(tokens.get(i).getLexicalComp().equals("OP_ARIT"))){
+                    print += tokens.get(i).getLexeme() + " ";
+                }
+            }
+            i++;
+        }
+        indexPrint = i;
+        return print;
     }
     
   

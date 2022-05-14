@@ -69,44 +69,44 @@ public class SintacticAnalysis {
         g.loopForFunExecUntilChangeNotDetected(() -> {
             //Correctos
             g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
-                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
-                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", true);
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PARENTESIS_C PUNTO_COMA", true);
-            
-            //Incorrectos
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
-                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
-                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C", 
-                true,200, "Error Sintactico({}): Falto punto y coma (print)  [Linea: #, Caracter: %]");
-            g.group("IMPRIMIR", "PRINT COMILLAS "
-                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
-                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
-                true,200, "Error Sintactico({}): Falto parentesis de apertura (print)  [Linea: #, Caracter: %]");
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
-                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
-                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PUNTO_COMA", 
-                true,200, "Error Sintactico({}): Falto parentesis de cierre (print)  [Linea: #, Caracter: %]");
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A "
-                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
-                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
-                true,200, "Error Sintactico({}): Faltaron comillas (print)  [Linea: #, Caracter: %]");
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
-                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*) "
-                + "(OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
-                true,200, "Error Sintactico({}): Faltaron comillas (print)  [Linea: #, Caracter: %]");
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
-                + "(((SENTENCIA)* | (IDENTIFICADOR)* | (NUMERO)* | (REG_16)* | (REG_8)*)"
-                + "COMILLAS (OP_ARIT (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
-                true,200, "Error Sintactico({}): Falto un valor a concatenar (print)  [Linea: #, Caracter: %]");
-            
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PARENTESIS_C", 
-                true,200, "Error Sintactico({}): Falto punto y coma (print)  [Linea: #, Caracter: %]");
-            g.group("IMPRIMIR", "PRINT IDENTIFICADOR PARENTESIS_C PUNTO_COMA", 
-                true,200, "Error Sintactico({}): Falto parentesis de apertura (print)  [Linea: #, Caracter: %]");
-            g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PUNTO_COMA", 
-                true,200, "Error Sintactico({}): Falto parentesis de cierre (print)  [Linea: #, Caracter: %]");
-            
+                + "(((SENTENCIA)? | (IDENTIFICADOR)? | (NUMERO)? | (REG_16)? | (REG_8)? | (ASIGNACION)?)* "
+                + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", true, productions);
+            g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PARENTESIS_C PUNTO_COMA", true, productions);
+
         });
+        
+        //Incorrectos
+        g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+            + "(((SENTENCIA)? | (IDENTIFICADOR)? | (NUMERO)? | (REG_16)? | (REG_8)? | (ASIGNACION)?)* "
+            + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C", 
+            true,200, "Error Sintactico({}): Falto punto y coma (print)  [Linea: #, Caracter: %]");
+        g.group("IMPRIMIR", "PRINT COMILLAS "
+            + "(((SENTENCIA)? | (IDENTIFICADOR)? | (NUMERO)? | (REG_16)? | (REG_8)? | (ASIGNACION)?)* "
+            + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+            true,200, "Error Sintactico({}): Falto parentesis de apertura (print)  [Linea: #, Caracter: %]");
+        g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+            + "((((SENTENCIA)? | (IDENTIFICADOR)? | (NUMERO)? | (REG_16)? | (REG_8)? | (ASIGNACION)?)* "
+            + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PUNTO_COMA", 
+            true,200, "Error Sintactico({}): Falto parentesis de cierre (print)  [Linea: #, Caracter: %]");
+        g.group("IMPRIMIR", "PRINT PARENTESIS_A "
+            + "(((SENTENCIA)? | (IDENTIFICADOR)? | (NUMERO)? | (REG_16)? | (REG_8)? | (ASIGNACION)?)* "
+            + "COMILLAS (OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+            true,200, "Error Sintactico({}): Faltaron comillas (print)  [Linea: #, Caracter: %]");
+        g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+            + "(((SENTENCIA)? | (IDENTIFICADOR)? | (NUMERO)? | (REG_16)? | (REG_8)? | (ASIGNACION)?)* "
+            + "(OP_ARIT IDENTIFICADOR (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+            true,200, "Error Sintactico({}): Faltaron comillas (print)  [Linea: #, Caracter: %]");
+        g.group("IMPRIMIR", "PRINT PARENTESIS_A COMILLAS "
+            + "(((SENTENCIA)? | (IDENTIFICADOR)? | (NUMERO)? | (REG_16)? | (REG_8)? | (ASIGNACION)?)* "
+            + "COMILLAS (OP_ARIT (OP_ARIT)?)*)* PARENTESIS_C PUNTO_COMA", 
+            true,200, "Error Sintactico({}): Falto un valor a concatenar (print)  [Linea: #, Caracter: %]");
+
+        g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PARENTESIS_C", 
+            true,200, "Error Sintactico({}): Falto punto y coma (print)  [Linea: #, Caracter: %]");
+        g.group("IMPRIMIR", "PRINT IDENTIFICADOR PARENTESIS_C PUNTO_COMA", 
+            true,200, "Error Sintactico({}): Falto parentesis de apertura (print)  [Linea: #, Caracter: %]");
+        g.group("IMPRIMIR", "PRINT PARENTESIS_A IDENTIFICADOR PUNTO_COMA", 
+            true,200, "Error Sintactico({}): Falto parentesis de cierre (print)  [Linea: #, Caracter: %]");
 
         
         /* ASM */
@@ -685,7 +685,7 @@ public class SintacticAnalysis {
         g.group("PRINCIPAL", "MAIN", true,
                 150, "Error Sintactico({}): No esta en una declaracion correcta (main) [Linea: #, Caracter: %]");
 
-       g.show();
+       //g.show();
     }
     
     private void sentencia(Grammar g){

@@ -40,7 +40,6 @@ public class MNEMS {
     
     
     public void MOV(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
-        System.out.println("v1: " + val1 + " v2: " + val2);
         if(isReg(lexical1) && isReg(lexical2)){
             r.regs.put(val2, r.regs.get(val1));
         }else if(isNum(lexical1) && isReg(lexical2)){
@@ -63,9 +62,7 @@ public class MNEMS {
             errors.add(new ErrorLSSL(160, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }
     }
-        /*asm("mov 9, ax");
-	asm("add 4, ax");
-	asm("mov ax, b");*/
+    
     public void ADD(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
         int newValue = 0;
         if(isReg(lexical1) && isReg(lexical2)){

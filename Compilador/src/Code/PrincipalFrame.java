@@ -174,6 +174,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
         tokens.clear();
         errors.clear();
         productions.clear();
+        textSintax.setText("");
         try {
             lexAnalysis();
             addToLexTable();
@@ -224,7 +225,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
             textSintax.setText("Compilación Finalizada.\n" + strErrors + "\nLa compilación finalizo con errores...");
             textSintax.setForeground(Color.RED);
         } else {
-            textSintax.setText("Compilación Finalizada.");
+            textSintax.setText("Compilación Finalizada." + "\n" + textSintax.getText());
             textSintax.setForeground(Color.BLUE);
         }
         textSintax.setCaretPosition(0);
@@ -265,7 +266,7 @@ public class PrincipalFrame extends javax.swing.JFrame {
     
     private void semanticAnalysis(){
         SemanticAnalysis s = new SemanticAnalysis();
-        s.analysis(productions, errors);
+        s.analysis(productions, errors, textSintax);
     }
     
 
