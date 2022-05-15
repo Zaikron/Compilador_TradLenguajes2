@@ -93,33 +93,116 @@ public class MNEMS {
     
     public void ADD(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
         int newValue = 0;
+        //revisar que sean del mismo tamaño
         if(isReg(lexical1) && isReg(lexical2)){
-            newValue = Integer.parseInt(r.regs.get(val2)) + Integer.parseInt(r.regs.get(val1));
-            r.regs.put(val2, String.valueOf(newValue));
+            if(lexical1.equals(lexical2))
+            {
+                newValue = Integer.parseInt(r.regs.get(val2)) + Integer.parseInt(r.regs.get(val1));
+                r.regs.put(val2, String.valueOf(newValue));
+            }
+            else
+            {
+                errors.add(new ErrorLSSL(170, " --- Error Semantico({}): Los registros deben ser del mismo tamaño  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
+            
         }else if(isNum(lexical1) && isReg(lexical2)){
-            newValue = Integer.parseInt(r.regs.get(val2)) + Integer.parseInt(val1);
-            r.regs.put(val2, String.valueOf(newValue));
+            if(lexical2.equals("REG_8") && Integer.parseInt(val1)>255){
+                    errors.add(new ErrorLSSL(171, " --- Error Semantico({}): El valor supera la capacidad del registro  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }else{  
+                    newValue = Integer.parseInt(r.regs.get(val2)) + Integer.parseInt(val1);
+                    r.regs.put(val2, String.valueOf(newValue));
+            }
+        }else if(isIdent(lexical1) && isReg(lexical2)){
+            //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val1)){
+                //si el registro es de 8 bits, revisar que el valor sea menor a 256
+                if(lexical2.equals("REG_8") && Integer.parseInt(getVar(struct, val1).saved)>255){
+                    errors.add(new ErrorLSSL(172, " --- Error Semantico({}): El valor supera la capacidad del registro  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                }else{  
+                    newValue = Integer.parseInt(r.regs.get(val2)) + Integer.parseInt(getVar(struct, val1).saved);
+                    r.regs.put(val2, String.valueOf(newValue));
+                }
+            }else{
+                errors.add(new ErrorLSSL(173, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }    
+        }else if(isNum(lexical1) && isIdent(lexical2)){
+            //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val2)){
+                  
+                    newValue = Integer.parseInt(val1) + Integer.parseInt(getVar(struct, val2).saved);
+                    getVar(struct, val2).saved = Integer.toString(newValue);
+                
+            }else{
+                errors.add(new ErrorLSSL(177, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
+        }else if(isIdent(lexical1) && isIdent(lexical2)){
+            //revisar si existen
+            if(existIdentifier(struct, val1) && existIdentifier(struct, val2)){
+                  
+                    newValue = Integer.parseInt(getVar(struct, val1).saved) + Integer.parseInt(getVar(struct, val2).saved);
+                    getVar(struct, val2).saved = Integer.toString(newValue);
+                
+            }else{
+                errors.add(new ErrorLSSL(177, " --- Error Semantico({}): Alguna de las variables no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
         }else{
             //Error o caso no programado
-            errors.add(new ErrorLSSL(160, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            errors.add(new ErrorLSSL(176, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }
     }
     
     public void SUB(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
         int newValue = 0;
+        //revisar que sean del mismo tamaño
         if(isReg(lexical1) && isReg(lexical2)){
-            newValue = Integer.parseInt(r.regs.get(val2)) - Integer.parseInt(r.regs.get(val1));
-            r.regs.put(val2, String.valueOf(newValue));
+            if(lexical1.equals(lexical2))
+            {
+                newValue = Integer.parseInt(r.regs.get(val2)) - Integer.parseInt(r.regs.get(val1));
+                r.regs.put(val2, String.valueOf(newValue));
+            }
+            else
+            {
+                errors.add(new ErrorLSSL(180, " --- Error Semantico({}): Los registros deben ser del mismo tamaño  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
+            
         }else if(isNum(lexical1) && isReg(lexical2)){
             newValue = Integer.parseInt(r.regs.get(val2)) - Integer.parseInt(val1);
             r.regs.put(val2, String.valueOf(newValue));
+            
+        }else if(isIdent(lexical1) && isReg(lexical2)){
+            //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val1)){
+                newValue = Integer.parseInt(r.regs.get(val2)) - Integer.parseInt(getVar(struct, val1).saved);
+                r.regs.put(val2, String.valueOf(newValue));
+                
+            }else{
+                errors.add(new ErrorLSSL(182, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }    
+        }else if(isNum(lexical1) && isIdent(lexical2)){
+            //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val2)){
+                  
+                    newValue = Integer.parseInt(getVar(struct, val2).saved) - Integer.parseInt(val1) ;
+                    getVar(struct, val2).saved = Integer.toString(newValue);
+                
+            }else{
+                errors.add(new ErrorLSSL(183, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
+        }else if(isIdent(lexical1) && isIdent(lexical2)){
+            //revisar si existen
+            if(existIdentifier(struct, val1) && existIdentifier(struct, val2)){
+                  
+                    newValue = Integer.parseInt(getVar(struct, val1).saved) - Integer.parseInt(getVar(struct, val2).saved);
+                    getVar(struct, val2).saved = Integer.toString(newValue);
+                
+            }else{
+                errors.add(new ErrorLSSL(184, " --- Error Semantico({}): Alguna de las variables no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
         }else{
             //Error o caso no programado
-            errors.add(new ErrorLSSL(160, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            errors.add(new ErrorLSSL(185, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }
     }
-    
-    
     
     public boolean isReg(String value){
         if(value.equals("REG_16") || value.equals("REG_8")){

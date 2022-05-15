@@ -111,7 +111,7 @@ public class SintacticAnalysis {
         
         /* ASM */
                 //Correctos
-                    //MOV, ADD
+                    //MOV, ADD, SUB
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
                 + "(MOV | ADD | SUB) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", true, productions);
