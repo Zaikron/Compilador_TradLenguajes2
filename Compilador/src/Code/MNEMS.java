@@ -11,8 +11,6 @@ public class MNEMS {
     String val1 = "";
     String val2 = "";
     
-        
-    
     String lexical1;
     String lexical2;
     
@@ -35,28 +33,58 @@ public class MNEMS {
             ADD(regs, errors, p, t.get(i), struct);
         }else if(mnem.equals("sub")){
             SUB(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("mul")){
+            //MUL(regs, errors, p, t.get(i), struct);
         }
     }
     
     
     public void MOV(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
         if(isReg(lexical1) && isReg(lexical2)){
-            r.regs.put(val2, r.regs.get(val1));
+            //revisar que sean del mismo tamaño
+            if(lexical1.equals(lexical2))
+                r.regs.put(val2, r.regs.get(val1));
+            else
+                errors.add(new ErrorLSSL(151, " --- Error Semantico({}): El tamaño de los registros debe ser igual  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }else if(isNum(lexical1) && isReg(lexical2)){
-            r.regs.put(val2, val1);
+            //si es un registro de 8 bits no puede almacenar mas de 256
+            if(lexical2.equals("REG_8") && Integer.parseInt(val1)>255)
+                errors.add(new ErrorLSSL(152, " --- Error Semantico({}): El valor supera la capacidad del registro  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            else    
+                r.regs.put(val2, val1);
         }else if(isIdent(lexical1) && isIdent(lexical2)){
-            //Se obtienen valores de identificadores
+            //comprobar que existen los identificadores
+            if(existIdentifier(struct, val1) && existIdentifier(struct, val2)){
+                getVar(struct, val2).saved = getVar(struct, val1).saved;
+            }else{
+                errors.add(new ErrorLSSL(153, " --- Error Semantico({}): Las variables no existen  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
         }else if(isIdent(lexical1) && isReg(lexical2)){
             //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val1)){
+                //si el registro es de 8 bits, revisar que el valor sea menor a 256
+                if(lexical2.equals("REG_8") && Integer.parseInt(getVar(struct, val1).saved)>255){
+                    errors.add(new ErrorLSSL(154, " --- Error Semantico({}): El valor supera la capacidad del registro  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                }else{  
+                    r.regs.put(val2, getVar(struct, val1).saved);
+                }
+            }else{
+                errors.add(new ErrorLSSL(153, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
         }else if(isReg(lexical1) && isIdent(lexical2)){
             //Asignar el nuevo valor al identificador
             if(existIdentifier(struct, val2)){
                 getVar(struct, val2).saved = r.regs.get(val1);
             }else{
-                errors.add(new ErrorLSSL(150, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+                errors.add(new ErrorLSSL(150, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
             }
         }else if(isNum(lexical1) && isIdent(lexical2)){
-            //Asignar el nuevo valor al identificador
+            //Revisar que el identificador exista
+            if(existIdentifier(struct, val2)){
+                getVar(struct, val2).saved = val1;
+            }else{
+                errors.add(new ErrorLSSL(155, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
         }else{
             //Error
             errors.add(new ErrorLSSL(160, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));

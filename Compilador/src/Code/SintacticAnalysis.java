@@ -118,36 +118,66 @@ public class SintacticAnalysis {
         
                 //Incorrectos
                     //MOV, ADD
-        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
-                + "(MOV | ADD | SUB)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
-                + "COMILLAS PARENTESIS_C", 
-                true,300, "Error Sintactico({}): Falto punto y coma (asm)  [Linea: #, Caracter: %]");
         g.group("ENSAMBLADOR", "ASM COMILLAS "
                 + "(MOV | ADD | SUB)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
-                true,300, "Error Sintactico({}): Falto parentesis de apertura (asm)  [Linea: #, Caracter: %]");
+                true,300, "Error Sintactico({}): Falto parentesis de apertura (asm)  [Linea: #, Caracter: %]");//11
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(MOV | ADD | SUB)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PARENTESIS_C", 
+                true,300, "Error Sintactico({}): Falto punto y coma (asm)  [Linea: #, Caracter: %]");//10
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
                 + "(MOV | ADD | SUB)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
                 + "COMILLAS PUNTO_COMA", 
-                true,300, "Error Sintactico({}): Falto parentesis de cierre (asm)  [Linea: #, Caracter: %]");
+                true,300, "Error Sintactico({}): Falto parentesis de cierre (asm)  [Linea: #, Caracter: %]");//9
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A "
                 + "(MOV | ADD | SUB) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
-                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");
+                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");//9
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
                 + "(MOV | ADD | SUB)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
                 + "PARENTESIS_C PUNTO_COMA", 
-                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");
+                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");//9
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
                 + "(MOV | ADD | SUB) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
-                true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");
+                true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");//9
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
                 + "(MOV | ADD | SUB)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
-                true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");
+                true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");//9
         
+         //MUL
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "MUL (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", true, productions);
         
+        //Incorrectos
+                    //MUL
+        g.group("ENSAMBLADOR", "ASM COMILLAS "
+                + "MUL  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Falto parentesis de apertura (asm)  [Linea: #, Caracter: %]");//7
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "MUL  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "COMILLAS PARENTESIS_C", 
+                true,300, "Error Sintactico({}): Falto punto y coma (asm)  [Linea: #, Caracter: %]");//7
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "MUL  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "COMILLAS PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Falto parentesis de cierre (asm)  [Linea: #, Caracter: %]");//7
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A "
+                + "MUL (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");//7
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "MUL  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");//7
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "MUL "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", 
+                true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");//7
         
         /*Declaraciones: Enteros */
                 //Correctos
