@@ -34,7 +34,9 @@ public class MNEMS {
         }else if(mnem.equals("sub")){
             SUB(regs, errors, p, t.get(i), struct);
         }else if(mnem.equals("mul")){
-            //MUL(regs, errors, p, t.get(i), struct);
+            MUL(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("div")){
+            DIV(regs, errors, p, t.get(i), struct);
         }
     }
     
@@ -201,6 +203,150 @@ public class MNEMS {
         }else{
             //Error o caso no programado
             errors.add(new ErrorLSSL(185, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void MUL(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        int newValue = 0;
+        if(isReg(lexical1)){
+            if(lexical1.equals("REG_8"))
+            {
+                newValue = Integer.parseInt(r.regs.get("al")) * Integer.parseInt(r.regs.get(val1));
+                r.regs.put("ax", String.valueOf(newValue));
+            }
+            else if(lexical1.equals("REG_16"))
+            {
+                newValue = Integer.parseInt(r.regs.get("ax")) * Integer.parseInt(r.regs.get(val1));
+                r.regs.put("dx", String.valueOf(newValue));
+            }
+        }else if(isNum(lexical1)){
+            if(Integer.parseInt(val1) > 0)
+            {
+               if(Integer.parseInt(val1) < 256)
+                {
+                    newValue = Integer.parseInt(r.regs.get("al")) * Integer.parseInt(val1);
+                    r.regs.put("ax", String.valueOf(newValue));
+                }
+                else
+                {
+                    newValue = Integer.parseInt(r.regs.get("ax")) * Integer.parseInt(val1);
+                    r.regs.put("dx", String.valueOf(newValue));
+                } 
+            }
+            else{
+                errors.add(new ErrorLSSL(190, " --- Error Semantico({}): No se aceptan números negativos  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+            }
+        }
+        else if(isIdent(lexical1)){
+            if(existIdentifier(struct, val1)){
+                int valorVariable = Integer.parseInt(getVar(struct, val1).saved);
+                if(valorVariable > 0)
+                {
+                   if(valorVariable < 256)
+                    {
+                        newValue = Integer.parseInt(r.regs.get("al")) * valorVariable;
+                        r.regs.put("ax", String.valueOf(newValue));
+                    }
+                    else
+                    {
+                        newValue = Integer.parseInt(r.regs.get("ax")) * valorVariable;
+                        r.regs.put("dx", String.valueOf(newValue));
+                    } 
+                }
+                else{
+                    errors.add(new ErrorLSSL(191, " --- Error Semantico({}): No se aceptan números negativos  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+                }
+            }
+            else{
+                    errors.add(new ErrorLSSL(192, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+            }
+        }else{
+        errors.add(new ErrorLSSL(193, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void DIV(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        //simular que se usa dx:ax copiando lo mismo a los dos registros
+        int newValue = 0;
+        int resto = 0;
+        if(isReg(lexical1)){
+            if(lexical1.equals("REG_8"))
+            {
+                newValue = Integer.parseInt(r.regs.get("ax")) / Integer.parseInt(r.regs.get(val1));
+                resto = Integer.parseInt(r.regs.get("ax")) % Integer.parseInt(r.regs.get(val1));
+                r.regs.put("al", String.valueOf(newValue));
+                r.regs.put("ah", String.valueOf(resto));
+                
+                r.regs.put("ax", "0");
+            }
+            else if(lexical1.equals("REG_16"))
+            {
+                newValue = Integer.parseInt(r.regs.get("ax")) / Integer.parseInt(r.regs.get(val1));
+                resto = Integer.parseInt(r.regs.get("ax")) % Integer.parseInt(r.regs.get(val1));
+                r.regs.put("al", String.valueOf(newValue));
+                r.regs.put("ah", String.valueOf(resto));
+                
+                r.regs.put("ax", "0");
+            }
+        }else if(isNum(lexical1)){
+            if(Integer.parseInt(val1) > 0)
+            {
+               if(Integer.parseInt(val1) < 256)
+                {
+                    newValue = Integer.parseInt(r.regs.get("ax")) / Integer.parseInt(val1);
+                    resto = Integer.parseInt(r.regs.get("ax")) % Integer.parseInt(val1);
+                    r.regs.put("al", String.valueOf(newValue));
+                    r.regs.put("ah", String.valueOf(resto));
+                    
+                    r.regs.put("ax", "0");
+                }
+                else
+                {
+                    newValue = Integer.parseInt(r.regs.get("ax")) / Integer.parseInt(val1);
+                    resto = Integer.parseInt(r.regs.get("ax")) % Integer.parseInt(val1);
+                    r.regs.put("al", String.valueOf(newValue));
+                    r.regs.put("ah", String.valueOf(resto));
+                    
+                    r.regs.put("ax", "0");
+                } 
+            }
+            else{
+                errors.add(new ErrorLSSL(190, " --- Error Semantico({}): No se aceptan números negativos  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+            }
+        }
+        else if(isIdent(lexical1)){
+            if(existIdentifier(struct, val1)){
+                int valorVariable = Integer.parseInt(getVar(struct, val1).saved);
+                if(valorVariable > 0)
+                {
+                   if(valorVariable < 256)
+                    {
+                        newValue = Integer.parseInt(r.regs.get("ax")) / valorVariable;
+                        resto = Integer.parseInt(r.regs.get("ax")) % valorVariable;
+                        r.regs.put("al", String.valueOf(newValue));
+                        r.regs.put("ah", String.valueOf(resto));
+                        
+                        r.regs.put("ax", "0");
+                    }
+                    else
+                    {
+                        newValue = Integer.parseInt(r.regs.get("ax")) / valorVariable;
+                        resto = Integer.parseInt(r.regs.get("ax")) % valorVariable;
+                        r.regs.put("al", String.valueOf(newValue));
+                        r.regs.put("ah", String.valueOf(resto));
+                        
+                        r.regs.put("ax", "0");
+                    } 
+                }
+                else{
+                    errors.add(new ErrorLSSL(191, " --- Error Semantico({}): No se aceptan números negativos  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+                }
+            }
+            else{
+                    errors.add(new ErrorLSSL(192, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+            }
+        }else{
+        errors.add(new ErrorLSSL(193, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }
     }
     

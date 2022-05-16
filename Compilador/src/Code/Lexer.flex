@@ -51,8 +51,14 @@ Numero = 0 | [1-9][0-9]*
     /* Palabra reservada ADD */
     ( add ) {return token(yytext(), "ADD", yyline, yycolumn);}
 
-    /* Palabra reservada ADD */
+    /* Palabra reservada SUB */
     ( sub ) {return token(yytext(), "SUB", yyline, yycolumn);}
+
+    /* Palabra reservada MUL */
+    ( mul ) {return token(yytext(), "MUL", yyline, yycolumn);}
+
+    /* Palabra reservada DIV */
+    ( div ) {return token(yytext(), "DIV", yyline, yycolumn);}
 
 
 /* Tipo de dato int */
