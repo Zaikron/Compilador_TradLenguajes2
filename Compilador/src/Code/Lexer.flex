@@ -60,6 +60,18 @@ Numero = 0 | [1-9][0-9]*
     /* Palabra reservada DIV */
     ( div ) {return token(yytext(), "DIV", yyline, yycolumn);}
 
+    /* Palabra reservada potencia */
+    ( pow ) {return token(yytext(), "POW", yyline, yycolumn);}
+
+    /* Palabra reservada seno */
+    ( sen ) {return token(yytext(), "SEN", yyline, yycolumn);}
+
+    /* Palabra reservada coseno */
+    ( cos ) {return token(yytext(), "COS", yyline, yycolumn);}
+
+    /* Palabra reservada tangente */
+    ( tan ) {return token(yytext(), "TAN", yyline, yycolumn);}
+
 
 /* Tipo de dato int */
 ( int ) {return token(yytext(), "INT", yyline, yycolumn);}

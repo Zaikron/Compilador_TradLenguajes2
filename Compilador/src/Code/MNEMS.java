@@ -37,6 +37,14 @@ public class MNEMS {
             MUL(regs, errors, p, t.get(i), struct);
         }else if(mnem.equals("div")){
             DIV(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("pow")){
+            POW(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("cos")){
+            COS(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("sen")){
+            SEN(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("tan")){
+            TAN(regs, errors, p, t.get(i), struct);
         }
     }
     
@@ -347,6 +355,94 @@ public class MNEMS {
             }
         }else{
         errors.add(new ErrorLSSL(193, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void POW(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        int pot = 0;
+        if(isNum(lexical1) && isNum(lexical2)){
+            pot = (int) Math.pow(Integer.valueOf(val1), Integer.valueOf(val2));
+            r.regs.put("dx", String.valueOf(pot));
+        }else if(isReg(lexical1) && isNum(lexical2)){
+            pot = (int) Math.pow(Integer.valueOf(r.regs.get(val1)), Integer.valueOf(val2));
+            r.regs.put("dx", String.valueOf(pot));
+        }else{
+            errors.add(new ErrorLSSL(220, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void COS(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        float cos = 0;
+        double value = 0;
+        if(isNum(lexical1) && isReg(lexical2)){
+            value = Double.parseDouble(val1);
+            cos =  (float)Math.cos(value);
+            r.regs.put(val2, String.valueOf(cos));
+        }else if(isReg(lexical1) && isReg(lexical2)){
+            value = Double.parseDouble(r.regs.get(val1));
+            cos =  (float)Math.cos(value);
+            r.regs.put(val2, String.valueOf(cos));
+        }else if(isReg(lexical1) && isIdent(lexical2)){
+            value = Double.parseDouble(r.regs.get(val1));
+            cos =  (float)Math.cos(value);
+            //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val2)){
+                getVar(struct, val2).saved = String.valueOf(cos);
+            }else{
+                errors.add(new ErrorLSSL(183, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
+        }else{
+            errors.add(new ErrorLSSL(221, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void SEN(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        float sen = 0;
+        double value = 0;
+        if(isNum(lexical1) && isReg(lexical2)){
+            value = Double.parseDouble(val1);
+            sen =  (float)Math.sin(value);
+            r.regs.put(val2, String.valueOf(sen));
+        }else if(isReg(lexical1) && isReg(lexical2)){
+            value = Double.parseDouble(r.regs.get(val1));
+            sen =  (float)Math.sin(value);
+            r.regs.put(val2, String.valueOf(sen));
+        }else if(isReg(lexical1) && isIdent(lexical2)){
+            value = Double.parseDouble(r.regs.get(val1));
+            sen =  (float)Math.sin(value);
+            //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val2)){
+                getVar(struct, val2).saved = String.valueOf(sen);
+            }else{
+                errors.add(new ErrorLSSL(184, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
+        }else{
+            errors.add(new ErrorLSSL(222, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void TAN(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        float tan = 0;
+        double value = 0;
+        if(isNum(lexical1) && isReg(lexical2)){
+            value = Double.parseDouble(val1);
+            tan =  (float)Math.tan(value);
+            r.regs.put(val2, String.valueOf(tan));
+        }else if(isReg(lexical1) && isReg(lexical2)){
+            value = Double.parseDouble(r.regs.get(val1));
+            tan =  (float)Math.tan(value);
+            r.regs.put(val2, String.valueOf(tan));
+        }else if(isReg(lexical1) && isIdent(lexical2)){
+            value = Double.parseDouble(r.regs.get(val1));
+            tan =  (float)Math.tan(value);
+            //Se obtiene valor de identificador, revisar si existe
+            if(existIdentifier(struct, val2)){
+                getVar(struct, val2).saved = String.valueOf(tan);
+            }else{
+                errors.add(new ErrorLSSL(183, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+            }
+        }else{
+            errors.add(new ErrorLSSL(221, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }
     }
     

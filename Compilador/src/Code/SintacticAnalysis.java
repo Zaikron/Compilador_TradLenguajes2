@@ -109,6 +109,17 @@ public class SintacticAnalysis {
             true,200, "Error Sintactico({}): Falto parentesis de cierre (print)  [Linea: #, Caracter: %]");
 
         
+        /* SEN, COS, TAN*/
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "(SEN | COS | TAN) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA (REG_16 | REG_8 | IDENTIFICADOR) "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", true, productions);
+        
+        /* POW */
+        g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
+                + "POW (NUMERO | IDENTIFICADOR | REG_16 | REG_8) COMA NUMERO "
+                + "COMILLAS PARENTESIS_C PUNTO_COMA", true, productions);
+        
+        
         /* ASM */
                 //Correctos
                     //MOV, ADD, SUB

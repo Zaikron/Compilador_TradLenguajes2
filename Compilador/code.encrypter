@@ -2,19 +2,19 @@ import BASIC;
 
 
 main(){
+	
+	asm("mov 5, ax");
 
-	int b;
-	int j = 34;
-	
-	asm("mov 9, ax");
-	asm("add 4, ax");
-	asm("sub 5, ax");
-	asm("mov ax, b");
-	
-		
-	print("hola");
-	print("Resultado de b = " + b);
-	print("Resultado de j = " + j);
+	int s; //Suma
+	int r; //Resta
+	int m; //Multiplicacion
+	int p; //Potencia
+	int res; //Resto
+	float d; //Division
+	float co; //Coseno
+	float sin; //Seno
+	float tang; //Tangente
+	print("holas");
 
 }
 

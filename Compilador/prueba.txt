@@ -1,20 +1,77 @@
 import BASIC;
-
+import ASM;
 
 main(){
 
-	int b;
-	int j = 34;
+	int s; //Suma
+	int r; //Resta
+	int m; //Multiplicacion
+	int p; //Potencia
+	int res; //Resto
+	int d; //Division
+	float co; //Coseno
+	float sin; //Seno
+	float tang; //Tangente
 	
-	asm("mov 9, ax");
-	asm("add 4, ax");
+	asm("mov 10, ax");
+	asm("mov 20, bx");
+	asm("mov 14, cx");
+	asm("mov 9, dx");
+	
+	//Suma
+	asm("add 6, ax");
+	asm("mov ax, s");
+	
+	//Resta
 	asm("sub 5, ax");
-	asm("mov ax, b");
+	asm("mov ax, r");
 	
-		
-	print("hola");
-	print("Resultado 1 = " + b);
-	print("Resultado 2 = " + j);
+	//Multiplicacion
+	asm("mov 7, al");
+	asm("mul 5");
+	asm("mov ax, m");
+	
+	//Division
+	asm("mov 10, ax");
+	asm("div 3");
+	asm("mov al, d");
+	asm("mov ah, res");
+	
+	//Potencia
+	asm("pow 2, 3");
+	asm("mov dx, p");
+	
+	//Coseno
+	asm("cos 40, bx");
+	asm("mov bx, co");
+	
+	//Seno
+	asm("sen 80, cx");
+	asm("mov cx, sin");
+	
+	//Tangente
+	asm("tan 60, dx");
+	asm("mov dx, tang");
+	
+	//Impresion de resultados
+	print("RESULTADOS DE OPERACIONES");
+	print("________________________");
+	print("Suma = " + s);
+	print("________________________");
+	print("Resta = " + r);
+	print("________________________");
+	print("Multiplicacion = " + m);
+	print("________________________");
+	print("Division = " + d + " Resto = " + res);
+	print("________________________");
+	print("Potencia = " + p);
+	print("________________________");
+	print("Coseno = " + co);
+	print("________________________");
+	print("Seno = " + sin);
+	print("________________________");
+	print("Tangente = " + tang);
+	print("________________________");
 
 }
 

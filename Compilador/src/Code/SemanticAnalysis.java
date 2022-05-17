@@ -11,6 +11,7 @@ public class SemanticAnalysis {
     
     ArrayList<Identifier> identifiers;
     boolean headerIndicator = false;
+    boolean asmIndicator = false;
     Registers regs;
     MNEMS mnems;
     
@@ -32,6 +33,8 @@ public class SemanticAnalysis {
             if(p.lexicalCompRank(0).equals("IMPORT")){
                 if(p.lexemeRank(1).equals("BASIC")){
                     headerIndicator = true;
+                }else if(p.lexemeRank(1).equals("ASM")){
+                    asmIndicator = true;
                 }else{
                     errors.add(new ErrorLSSL(80, " --- Error Semantico({}): La libreria importada no existe  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
                 }
@@ -76,8 +79,12 @@ public class SemanticAnalysis {
             
             //Ensamblador
             if(t.getLexicalComp().equals("ASM")){
-                mnems = new MNEMS(tokens.get(i+3).getLexeme(), tokens.get(i+4).getLexeme(), tokens.get(i+6).getLexeme(), identifiers);
-                mnems.checkMNEMS(regs, tokens, i, errors, p, struct);
+                if(asmIndicator == true){
+                    mnems = new MNEMS(tokens.get(i+3).getLexeme(), tokens.get(i+4).getLexeme(), tokens.get(i+6).getLexeme(), identifiers);
+                    mnems.checkMNEMS(regs, tokens, i, errors, p, struct);
+                }else{
+                    errors.add(new ErrorLSSL(82, " --- Error Semantico({}): No se ha importado la libreria ASM  [Linea: "+p.getLine()+", Caracter: "+p.getColumn()+"]", p, true));
+                }
             }
             
             //Print

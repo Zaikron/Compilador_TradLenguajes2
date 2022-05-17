@@ -51,8 +51,26 @@ Numero = 0 | [1-9][0-9]*
     /* Palabra reservada ADD */
     ( add ) {return token(yytext(), "ADD", yyline, yycolumn);}
 
-    /* Palabra reservada ADD */
+    /* Palabra reservada SUB */
     ( sub ) {return token(yytext(), "SUB", yyline, yycolumn);}
+
+    /* Palabra reservada MUL */
+    ( mul ) {return token(yytext(), "MUL", yyline, yycolumn);}
+
+    /* Palabra reservada DIV */
+    ( div ) {return token(yytext(), "DIV", yyline, yycolumn);}
+
+    /* Palabra reservada potencia */
+    ( pow ) {return token(yytext(), "POW", yyline, yycolumn);}
+
+    /* Palabra reservada seno */
+    ( sen ) {return token(yytext(), "SEN", yyline, yycolumn);}
+
+    /* Palabra reservada coseno */
+    ( cos ) {return token(yytext(), "COS", yyline, yycolumn);}
+
+    /* Palabra reservada tangente */
+    ( tan ) {return token(yytext(), "TAN", yyline, yycolumn);}
 
 
 /* Tipo de dato int */
