@@ -39,6 +39,8 @@ public class MNEMS {
             DIV(regs, errors, p, t.get(i), struct);
         }else if(mnem.equals("pow")){
             POW(regs, errors, p, t.get(i), struct);
+        }else if(mnem.equals("sqrt")){
+            SQRT(regs, errors, p, t.get(i), struct);
         }else if(mnem.equals("cos")){
             COS(regs, errors, p, t.get(i), struct);
         }else if(mnem.equals("sen")){
@@ -368,6 +370,34 @@ public class MNEMS {
             r.regs.put("dx", String.valueOf(pot));
         }else{
             errors.add(new ErrorLSSL(220, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
+        }
+    }
+    
+    public void SQRT(Registers r, ArrayList<ErrorLSSL> errors, Production p, Token t, String struct){
+        int sqrt = 0;
+        if(isNum(lexical1)){
+            sqrt = (int) Math.sqrt(Integer.valueOf(val1));
+            r.regs.put("dx", String.valueOf(sqrt));
+        }else if(isReg(lexical1)){
+            sqrt = (int) Math.sqrt(Integer.valueOf(r.regs.get(val1)));
+            r.regs.put("dx", String.valueOf(sqrt));
+        }else if(isIdent(lexical1)){
+            if(existIdentifier(struct, val1)){
+                int valorVariable = Integer.parseInt(getVar(struct, val1).saved);
+                if(valorVariable > 0)
+                {
+                    sqrt = (int) Math.sqrt(valorVariable);
+                    r.regs.put("dx", String.valueOf(sqrt)); 
+                }
+                else{
+                    errors.add(new ErrorLSSL(191, " --- Error Semantico({}): No se aceptan números negativos  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+                }
+            }
+            else{
+                    errors.add(new ErrorLSSL(192, " --- Error Semantico({}): La variable no existe  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));        
+            }
+        }else{
+            errors.add(new ErrorLSSL(230, " --- Error Semantico({}): La instruccion tiene acciones no validas  [Linea: "+t.getLine()+", Caracter: "+t.getColumn()+"]", p, true));
         }
     }
     

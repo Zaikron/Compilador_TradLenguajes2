@@ -63,6 +63,9 @@ Numero = 0 | [1-9][0-9]*
     /* Palabra reservada potencia */
     ( pow ) {return token(yytext(), "POW", yyline, yycolumn);}
 
+    /* Palabra reservada raiz cuadrada */
+    ( sqrt ) {return token(yytext(), "SQRT", yyline, yycolumn);}
+
     /* Palabra reservada seno */
     ( sen ) {return token(yytext(), "SEN", yyline, yycolumn);}
 

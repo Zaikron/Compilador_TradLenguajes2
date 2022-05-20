@@ -158,35 +158,35 @@ public class SintacticAnalysis {
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
                 true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");//9
         
-         //MUL
+         //MUL DIV SQRT
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
-                + "(MUL|DIV) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "(MUL|DIV|SQRT) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", true, productions);
         
         //Incorrectos
-                    //MUL DIV
+                    //MUL DIV SQRT
         g.group("ENSAMBLADOR", "ASM COMILLAS "
-                + "(MUL|DIV)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "(MUL|DIV|SQRT)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
                 true,300, "Error Sintactico({}): Falto parentesis de apertura (asm)  [Linea: #, Caracter: %]");//7
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
-                + "(MUL|DIV)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "(MUL|DIV|SQRT)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
                 + "COMILLAS PARENTESIS_C", 
                 true,300, "Error Sintactico({}): Falto punto y coma (asm)  [Linea: #, Caracter: %]");//7
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
-                + "(MUL|DIV)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "(MUL|DIV|SQRT)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
                 + "COMILLAS PUNTO_COMA", 
                 true,300, "Error Sintactico({}): Falto parentesis de cierre (asm)  [Linea: #, Caracter: %]");//7
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A "
-                + "(MUL|DIV) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "(MUL|DIV|SQRT) (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
                 true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");//7
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
-                + "(MUL|DIV)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
+                + "(MUL|DIV|SQRT)  (NUMERO | IDENTIFICADOR | REG_16 | REG_8) "
                 + "PARENTESIS_C PUNTO_COMA", 
                 true,300, "Error Sintactico({}): Faltaron comillas (asm)  [Linea: #, Caracter: %]");//7
         g.group("ENSAMBLADOR", "ASM PARENTESIS_A COMILLAS "
-                + "(MUL|DIV) "
+                + "(MUL|DIV|SQRT) "
                 + "COMILLAS PARENTESIS_C PUNTO_COMA", 
                 true,300, "Error Sintactico({}): Faltan datos (asm)  [Linea: #, Caracter: %]");//7
         
